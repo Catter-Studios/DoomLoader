@@ -1,0 +1,29 @@
+script(type="text/javascript" src="doom.js")
+form
+	p
+		script.
+			const queryString = window.location.search;
+			const urlParams = new URLSearchParams(queryString);
+			const profileName = urlParams.profile;
+			let profile;
+
+			for( const i in profiles )
+			{
+				const currentProfile = profiles[i];
+
+				if( currentProfile.name === profileName )
+				{
+					profile = currentProfile;
+					break;
+				}
+			}
+		input(name="Name" type="text" id="name" disabled="yes" value=name)
+		select(name="Computer" id="computer")
+			each computer in computers
+				option(value=computer.name id="computer"+computer.name)
+				script.
+					if(computer.name === profile.computer.name)
+					{
+						const ele = document.getElementById("computer"+computer.name);
+						ele.setAttribute("selected","");
+					}

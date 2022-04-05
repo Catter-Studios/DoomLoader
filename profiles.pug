@@ -1,0 +1,23 @@
+table
+	tr
+		th Name
+		//th Source Port
+		//th IWad
+		//th WADs
+		//th Autoload Profile
+		th
+		th
+	script.
+		const doom = require("doom.js");
+		export const profiles = doom.profiles;
+	each profile in profiles
+		tr
+			td= profile.name
+			//td= profile.sourceport
+			//td= profile.iwad
+			//td= profile.wads
+			//td= profile.autoloadProfile
+			td
+				button(onclick="doom('"+profile.name+"')") Run
+			td
+				a(href="profile.html&profile='"+profile.name+"'") Edit
