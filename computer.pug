@@ -1,0 +1,26 @@
+form(id="computerForm")
+	p Name:&nbsp;&nbsp;
+		input(type="text", disabled="true", name="name", size=50, value=(computer.name || ""))
+	p Dir:&nbsp;&nbsp;
+		input(type="text" size=50 name="dir" value=computer.dir)
+	p OS:&nbsp;&nbsp;
+		select(name="os")
+			if(computer.os === "mac")
+				option(value="mac" selected) Mac
+			else
+				option(value="mac") Mac
+
+			if(computer.os === "pc")
+				option(value="pc" selected) PC
+			else
+				option(value="pc") PC
+
+			if(computer.os === "linux")
+				option(value="linux" selected) Linux
+			else
+				option(value="linux") Linux
+	p Extra Options:&nbsp;&nbsp;
+		- const text = expand(computer.extraOptions);
+		- const lines = countLines(text)+3;
+		textarea(name="extraOptions" cols=60 height="auto" rows=Math.min(5,lines) oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
+			=text

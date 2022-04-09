@@ -1,0 +1,7 @@
+table
+	each computer in computers
+		tr
+			td
+				button(onclick="editComputer('" + JSON.stringify(computer) + "')") Edit
+			td= computer.name
+button(onclick="addComputer()") Add Computer

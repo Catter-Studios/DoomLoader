@@ -1,9 +1,0 @@
-{
-  "gzdoom": {
-	"paths"  : {
-	  "pc": "gzdoom.exe",
-	  "mac": "GZDoom.app/Contents/MacOS/gzdoom"
-	},
-	"options": "-config gzdoom.ini +logfile gzdoom.log +vid_fullscreen true"
-  }
-}

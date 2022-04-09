@@ -1,29 +1,42 @@
-script(type="text/javascript" src="doom.js")
-form
-	p
-		script.
-			const queryString = window.location.search;
-			const urlParams = new URLSearchParams(queryString);
-			const profileName = urlParams.profile;
-			let profile;
-
-			for( const i in profiles )
-			{
-				const currentProfile = profiles[i];
-
-				if( currentProfile.name === profileName )
-				{
-					profile = currentProfile;
-					break;
-				}
-			}
-		input(name="Name" type="text" id="name" disabled="yes" value=name)
-		select(name="Computer" id="computer")
-			each computer in computers
-				option(value=computer.name id="computer"+computer.name)
-				script.
-					if(computer.name === profile.computer.name)
-					{
-						const ele = document.getElementById("computer"+computer.name);
-						ele.setAttribute("selected","");
-					}
+form(id="profileForm")
+	p Name:&nbsp;&nbsp;
+		input(type="text", disabled="true", name="name", size=50, value=(profile.name||""))
+	p Source Port:&nbsp;&nbsp;
+		select(name="sourceport")
+			each key in Object.keys(data.sourceports)
+				if(profile.sourceport === key )
+					option(value=key selected)
+						=key
+				else
+					option(value=key)
+						=key
+	p IWad:&nbsp;&nbsp;
+		select(name="iwad")
+			each key in Object.keys(data.iwads)
+				if(profile.iwad === key )
+					option(value=key selected)
+						=key
+				else
+					option(value=key)
+						=key
+	p Extra Options:&nbsp;&nbsp;
+		- const text = expand(profile.options);
+		- const lines = countLines(text)+3;
+		textarea(name="options" cols=60 height="auto" rows=Math.min(5,lines) oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
+			=(profile.options||"")
+	p WADs:&nbsp;&nbsp
+		- const text2 = expand(profile.wads);
+		- const lines2 = countLines(text2)+3;
+		textarea(name="wads" cols=60 height="auto" rows=Math.min(5,lines2) oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
+			=text2
+	p Autoload Profile:&nbsp;&nbsp;
+		select(name="autoloadProfile")
+			each key in Object.keys(data.autoloadProfiles)
+				if(profile.autoloadProfile===key)
+					option(value=key selected)
+						=key
+				else
+					option(value=key)
+						=key
+	button(name="save" type="submit" formaction="javascript:profileForm(document.getElementById('profileForm'));") Save
+	button(name="cancel" formaction="") Cancel

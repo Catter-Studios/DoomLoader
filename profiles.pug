@@ -1,23 +1,23 @@
 table
-	tr
-		th Name
+	//tr
+		//th
 		//th Source Port
 		//th IWad
 		//th WADs
 		//th Autoload Profile
-		th
-		th
-	script.
-		const doom = require("doom.js");
-		export const profiles = doom.profiles;
+		//th
+		//th Name
 	each profile in profiles
 		tr
+			td
+				button(onclick="doom('" + profile.name + "')") Run
+			td
+				button(onclick="editProfile('" + JSON.stringify(profile) + "')") Edit
+			td
+				button(onclick="deleteProfile('" + JSON.stringify(profile) + "')") Delete
 			td= profile.name
 			//td= profile.sourceport
 			//td= profile.iwad
 			//td= profile.wads
 			//td= profile.autoloadProfile
-			td
-				button(onclick="doom('"+profile.name+"')") Run
-			td
-				a(href="profile.html&profile='"+profile.name+"'") Edit
+button(onclick="addProfile()") Add Profile
