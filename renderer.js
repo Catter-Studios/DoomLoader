@@ -3,9 +3,9 @@ const pug = require("pug");
 const path = require("path");
 const exec = require('child_process').exec;
 const root = document.querySelector("div#app");
-let currentContext;
 const contexts = {};
 const dataFile = "data.json";
+const useLiveData = true;
 let data;
 refreshData();
 
@@ -54,11 +54,12 @@ contexts.sourceport = {
 	template: "sourceport.pug"
 }
 
+let currentContext = contexts.profiles;
+
 function addProfile()
 {
 	editProfile("{}");
 	const form = document.getElementById("profileForm");
-	console.log(name);
 	form["name"].removeAttribute("disabled");
 }
 
@@ -71,6 +72,7 @@ function deleteProfile(profile)
 
 function changeContext(context, input=null)
 {
+	currentContext = context;
 	const func = context.func;
 	const pugFunc = context.pugFunc;
 
@@ -80,9 +82,13 @@ function changeContext(context, input=null)
 		input = data;
 	}
 
+	if( !input )
+	{
+		return;
+	}
+
 	const html = pugFunc(input);
 	root.innerHTML = html;
-	currentContext = context;
 
 	if(func)
 	{
@@ -90,9 +96,42 @@ function changeContext(context, input=null)
 	}
 }
 
+let initialRefresh = true;
+
 function refreshData()
 {
-	data = JSON.parse(fs.readFileSync(dataFile));
+	if( useLiveData )
+	{
+		const configPromise = import("/Users/candice/Dropbox/SaveGames/doom/doomloader/config.js");
+
+		configPromise.then(function(config){
+			const liveData = {};
+			liveData.profiles = config.profiles;
+			liveData.computers = config.computers;
+			liveData.autoloadProfiles = config.autoloadProfiles;
+			liveData.iwads = config.iwads;
+			liveData.sourceports = config.sourceports;
+
+			if( data === liveData )
+			{
+				return;
+			}
+
+			data = liveData;
+			//console.log(JSON.stringify(data,null,"\t"));
+
+			if( initialRefresh )
+			{
+				writeData();
+				refresh();
+				initialRefresh = false;
+			}
+		});
+	}
+	else
+	{
+		data = JSON.parse(fs.readFileSync(dataFile));
+	}
 }
 
 compileAll();
@@ -310,6 +349,11 @@ function sanitise(str)
 		return str;
 	}
 
+	if( typeof str === "object" )
+	{
+		str = str.gzdoom;
+	}
+
 	str = str.replaceAll("/", path.sep);
 	str = str.replaceAll("\\", path.sep);
 
@@ -325,13 +369,20 @@ function countLines(str="")
 {
 	str = str.trim();
 
-	if( str.match( /\s+/g ) )
+	if( str.match( /^\s*$/g ) )
 	{
 		return 0;
 	}
 	else
 	{
-		return str.match(/\n/g ).length;
+		if( str.match(/\n/g ) )
+		{
+			return str.match(/\n/g ).length;
+		}
+		else
+		{
+			return 1;
+		}
 	}
 }
 
