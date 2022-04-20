@@ -6,8 +6,10 @@ const root = document.querySelector("div#app");
 const contexts = {};
 const dataFile = "data.json";
 const useLiveData = true;
+const liveDataFile = "/Users/candice/Dropbox/SaveGames/doom/doomloader/config.js";
+let initialRefresh = true;
 let data;
-refreshData();
+//refreshData();
 
 contexts.profiles = {
 	template: "profiles.pug"
@@ -24,35 +26,35 @@ contexts.addProfile = {
 
 contexts.computers = {
 	template: "computers.pug"
-}
+};
 
 contexts.computer = {
 	template: "computer.pug"
-}
+};
 
 contexts.iwads = {
 	template: "iwads.pug"
-}
+};
 
 contexts.iwad = {
 	template: "iwad.pug"
-}
+};
 
 contexts.autoloadProfiles = {
 	template: "autoloadProfiles.pug"
-}
+};
 
 contexts.autoloadProfile = {
 	template: "autoloadProfile.pug"
-}
+};
 
 contexts.sourceports = {
 	template: "sourceports.pug"
-}
+};
 
 contexts.sourceport = {
 	template: "sourceport.pug"
-}
+};
 
 let currentContext = contexts.profiles;
 
@@ -70,20 +72,21 @@ function deleteProfile(profile)
 	refresh();
 }
 
-function changeContext(context, input=null)
+function changeContext(context, input = null)
 {
 	currentContext = context;
 	const func = context.func;
 	const pugFunc = context.pugFunc;
 
-	if( !input )
+	if(!input)
 	{
 		refreshData();
 		input = data;
 	}
 
-	if( !input )
+	if(!input)
 	{
+		console.log("Data refresh failed");
 		return;
 	}
 
@@ -96,41 +99,42 @@ function changeContext(context, input=null)
 	}
 }
 
-let initialRefresh = true;
+function loadFromFile(varName, fileName)
+{
+	let str = fs.readFileSync(fileName).toString() + " " + varName;
+	str = str.replaceAll(/export/ig, "");
+	const ret = eval(str);
+	return ret;
+}
 
 function refreshData()
 {
-	if( useLiveData )
+	if(useLiveData)
 	{
-		const configPromise = import("/Users/candice/Dropbox/SaveGames/doom/doomloader/config.js");
+		const liveData = {};
+		liveData.profiles = loadFromFile("profiles", liveDataFile);
+		liveData.computers = loadFromFile("computers", liveDataFile);
+		liveData.autoloadProfiles = loadFromFile("autoloadProfiles", liveDataFile);
+		liveData.iwads = loadFromFile("iwads", liveDataFile);
+		liveData.sourceports = loadFromFile("sourceports", liveDataFile);
 
-		configPromise.then(function(config){
-			const liveData = {};
-			liveData.profiles = config.profiles;
-			liveData.computers = config.computers;
-			liveData.autoloadProfiles = config.autoloadProfiles;
-			liveData.iwads = config.iwads;
-			liveData.sourceports = config.sourceports;
+		if(data === liveData)
+		{
+			return;
+		}
 
-			if( data === liveData )
-			{
-				return;
-			}
+		data = liveData;
 
-			data = liveData;
-			//console.log(JSON.stringify(data,null,"\t"));
-
-			if( initialRefresh )
-			{
-				writeData();
-				refresh();
-				initialRefresh = false;
-			}
-		});
+		if(initialRefresh)
+		{
+			writeData();
+			changeContext(currentContext,data);
+			initialRefresh = false;
+		}
 	}
 	else
 	{
-		data = JSON.parse(fs.readFileSync(dataFile));
+		data = JSON.parse(fs.readFileSync(dataFile).toString());
 	}
 }
 
@@ -146,9 +150,9 @@ function compileAll()
 			continue;
 		}
 
-		if( !fs.existsSync(val.template))
+		if(!fs.existsSync(val.template))
 		{
-			console.log( "Cannot find " + val.template );
+			console.log("Cannot find " + val.template);
 			continue;
 		}
 
@@ -175,11 +179,11 @@ function editProfile(profile)
 
 function editComputer(computer)
 {
-	changeContext( contexts.computer, {
-		data: data,
+	changeContext(contexts.computer, {
+		data    : data,
 		computer: JSON.parse(computer)
 	});
-	console.log( "Editing computer> " + JSON.stringify(computer));
+	console.log("Editing computer> " + JSON.stringify(computer));
 }
 
 function profileForm(form)
@@ -349,7 +353,7 @@ function sanitise(str)
 		return str;
 	}
 
-	if( typeof str === "object" )
+	if(typeof str === "object")
 	{
 		str = str.gzdoom;
 	}
@@ -360,24 +364,24 @@ function sanitise(str)
 	return str;
 }
 
-function expand(str="")
+function expand(str = "")
 {
-	return str.replaceAll(/(?<!\\|[\+-]\w+) /g,"\n");
+	return str.replaceAll(/(?<!\\|[\+-]\w+) /g, "\n");
 }
 
-function countLines(str="")
+function countLines(str = "")
 {
 	str = str.trim();
 
-	if( str.match( /^\s*$/g ) )
+	if(str.match(/^\s*$/g))
 	{
 		return 0;
 	}
 	else
 	{
-		if( str.match(/\n/g ) )
+		if(str.match(/\n/g))
 		{
-			return str.match(/\n/g ).length;
+			return str.match(/\n/g).length;
 		}
 		else
 		{
@@ -386,7 +390,7 @@ function countLines(str="")
 	}
 }
 
-function contract(str="")
+function contract(str = "")
 {
-	return str.replaceAll(/\n/g," ");
+	return str.replaceAll(/\n/g, " ");
 }
