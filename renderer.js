@@ -371,7 +371,7 @@ function unEscape(htmlStr) {
 
 function sanitise(str)
 {
-	if( !str )
+	if( !str || typeof str !== "string" )
 	{
 		return str;
 	}
