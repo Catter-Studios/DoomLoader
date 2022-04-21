@@ -220,6 +220,40 @@ function writeData()
 	fs.writeFileSync(dataFile, JSON.stringify(data));
 }
 
+function sanitiseObject(obj)
+{
+	console.log("-----=====Before=====-----\n"+JSON.stringify(obj,null,"\t"));
+	if( !obj )
+	{
+		return obj;
+	}
+
+	const keys = Object.keys(obj);
+
+	for( const x in keys )
+	{
+		const key = keys[x];
+		console.log( "Trying " + key );
+		switch( typeof obj[key] )
+		{
+			case "object":
+				console.log("OBJECT");
+				obj[key] = sanitiseObject( obj[key] );
+				break;
+			case "string":
+				console.log("STRING");
+				obj[key] = sanitise( obj[key] );
+				break;
+			default:
+				//Leave alone
+				console.log("OTHER");
+				break;
+		}
+	}
+	console.log("-----=====After=====-----\n"+JSON.stringify(obj,null,"\t"));
+	return obj;
+}
+
 function refresh()
 {
 	changeContext(currentContext);
@@ -255,7 +289,7 @@ function doom(profileName)
 	}
 
 	const sourceport = data.sourceports[profile.sourceport];
-	let sourceportPath = sanitise(sourceport.paths[computer.os]);
+	let sourceportPath = sanitisePath(sourceport.paths[computer.os]);
 
 	if(!path.isAbsolute(sourceportPath))
 	{
@@ -317,20 +351,50 @@ function doom(profileName)
 	});
 }
 
+function escape(htmlStr) {
+	return htmlStr.replace(/&/g, "&amp;")
+	              .replace(/</g, "&lt;")
+	              .replace(/>/g, "&gt;")
+	              .replace(/"/g, "&quot;")
+	              .replace(/'/g, "&#39;");
+
+}
+
+function unEscape(htmlStr) {
+	htmlStr = htmlStr.replace(/&lt;/g , "<");
+	htmlStr = htmlStr.replace(/&gt;/g , ">");
+	htmlStr = htmlStr.replace(/&quot;/g , "\"");
+	htmlStr = htmlStr.replace(/&#39;/g , "\'");
+	htmlStr = htmlStr.replace(/&amp;/g , "&");
+	return htmlStr;
+}
+
 function sanitise(str)
+{
+	if( !str )
+	{
+		return str;
+	}
+
+	console.log("Before str: " + str );
+	str = str.replaceAll(/'/ig,"\\\'");
+	str = str.replaceAll(/"/ig,"\\\"");
+	console.log("After str: " + str );
+	return str;
+}
+
+function sanitisePath(str)
 {
 	if(!str)
 	{
 		return str;
 	}
 
-	if(typeof str === "object")
+	if( path )
 	{
-		str = str.gzdoom;
+		str = str.replaceAll("/", path.sep);
+		str = str.replaceAll("\\", path.sep);
 	}
-
-	str = str.replaceAll("/", path.sep);
-	str = str.replaceAll("\\", path.sep);
 
 	return str;
 }
