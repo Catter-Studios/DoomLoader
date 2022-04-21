@@ -5,9 +5,6 @@ const exec = require('child_process').exec;
 const root = document.querySelector("div#app");
 const contexts = {};
 const dataFile = "data.json";
-const useLiveData = true;
-const liveDataFile = "/Users/candice/Dropbox/SaveGames/doom/doomloader/config.js";
-let initialRefresh = true;
 let data;
 //refreshData();
 
@@ -109,33 +106,7 @@ function loadFromFile(varName, fileName)
 
 function refreshData()
 {
-	if(useLiveData)
-	{
-		const liveData = {};
-		liveData.profiles = loadFromFile("profiles", liveDataFile);
-		liveData.computers = loadFromFile("computers", liveDataFile);
-		liveData.autoloadProfiles = loadFromFile("autoloadProfiles", liveDataFile);
-		liveData.iwads = loadFromFile("iwads", liveDataFile);
-		liveData.sourceports = loadFromFile("sourceports", liveDataFile);
-
-		if(data === liveData)
-		{
-			return;
-		}
-
-		data = liveData;
-
-		if(initialRefresh)
-		{
-			writeData();
-			changeContext(currentContext,data);
-			initialRefresh = false;
-		}
-	}
-	else
-	{
-		data = JSON.parse(fs.readFileSync(dataFile).toString());
-	}
+	data = JSON.parse(fs.readFileSync(dataFile).toString());
 }
 
 compileAll();
