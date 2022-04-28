@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "genData": "node config-to-data.js /Users/candice/Dropbox/SaveGames/doom/doomloader/config.js data.json"
+    "genDataUnix": "node config-to-data.js /Users/candice/Dropbox/SaveGames/doom/doomloader/config.js data.json",
+    "genIndexWin": "del index.html & pug index.pug index.html",
+    "copyDataWin": "del data.json & copy c:\\users\\kixs_\\dropbox\\savegames\\doom\\doomloader-gui\\data.json %cd%\\data.json"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +17,7 @@
   },
   "dependencies": {
     "chalk": "^5.0.1",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "pug-cli": "^1.0.0-alpha6"
   }
 }

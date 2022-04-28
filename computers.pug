@@ -2,6 +2,8 @@ table
 	each computer in computers
 		tr
 			td
+				button(onclick="selectComputer('" + sanitise(JSON.stringify(computer)) + "')") Select
+			td
 				button(onclick="editComputer('" + sanitise(JSON.stringify(computer)) + "')") Edit
 			td= computer.name
 button(onclick="addComputer()") Add Computer

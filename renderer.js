@@ -5,11 +5,14 @@ const exec = require('child_process').exec;
 const root = document.querySelector("div#app");
 const contexts = {};
 const dataFile = "data.json";
+const selectedComputerTitle = "Selected Computer: ";
 let data;
+let selectedComputer;
 //refreshData();
 
 contexts.profiles = {
-	template: "profiles.pug"
+	template: "profiles.pug",
+	func: searchFunc
 };
 
 contexts.profile = {
@@ -53,7 +56,7 @@ contexts.sourceport = {
 	template: "sourceport.pug"
 };
 
-let currentContext = contexts.profiles;
+let currentContext;
 
 function addProfile()
 {
@@ -110,7 +113,8 @@ function refreshData()
 }
 
 compileAll();
-changeContext(contexts.profiles);
+changeContext(contexts.computers);
+updateSelectedComputer();
 
 function compileAll()
 {
@@ -163,19 +167,7 @@ function profileForm(form)
 	const sourceport = form["sourceport"].value;
 	const iwad = form["iwad"].value;
 	const autoloadProfile = form["autoloadProfile"].value;
-	let profile;
-
-	for(const i in data.profiles)
-	{
-		const ele = data.profiles[i];
-
-		if(ele.name === name)
-		{
-			profile = ele;
-			break;
-		}
-	}
-
+	let profile = getProfile(name);
 	let newProfile = false;
 
 	if(!profile)
@@ -257,30 +249,54 @@ function sanitiseObject(obj)
 function refresh()
 {
 	changeContext(currentContext);
+	window.scrollTo(0,0);
+}
+
+function getProfile(name)
+{
+	console.log(`Finding profile ${name}`);
+	let selected;
+	const arr = data.profiles;
+	const keys = Object.keys(arr);
+
+	for( const x in keys )
+	{
+		const key = keys[x];
+		const val = arr[key];
+
+		if( val.name === name )
+		{
+			selected = val;
+			break;
+		}
+	}
+
+	console.log("Result: " + JSON.stringify(selected));
+
+	return selected;
 }
 
 function doom(profileName)
 {
-	let profile;
-
-	for(const i in data.profiles)
-	{
-		const currentProfile = data.profiles[i];
-		const name = currentProfile.name;
-
-		if(name === profileName)
-		{
-			profile = currentProfile;
-			break;
-		}
-	}
+	const profile = getProfile(profileName );
 
 	if(!profile)
 	{
 		return;
 	}
 
-	const computer = data.computers[2];
+	if( !selectedComputer )
+	{
+		alert("You have not selected a computer yet.");
+		return;
+	}
+
+	const computer = selectedComputer;
+
+	console.log("-----=====DOOM=====-----");
+	console.log("Profile: " + JSON.stringify(profile) );
+	console.log("Computer: " + JSON.stringify(selectedComputer));
+
 	const dir = path.resolve(computer.dir);
 
 	if(!path.isAbsolute(dir))
@@ -344,10 +360,21 @@ function doom(profileName)
 	}
 
 	console.log(command);
+	console.log("BEFORE: " + JSON.stringify(data.profiles));
+
+	data.profiles = data.profiles.filter(function(ele){
+		return ele != profile;
+	});
+
+	data.profiles.unshift(profile);
+
+	console.log("AFTER: " + JSON.stringify(data.profiles));
+	writeData();
+	refresh();
 
 	exec(command, {cwd: dir}, () =>
 	{
-		//process.exit(0);
+		//Do nothing
 	});
 }
 
@@ -428,4 +455,101 @@ function countLines(str = "")
 function contract(str = "")
 {
 	return str.replaceAll(/\n/g, " ");
+}
+
+function getComputer(computerName)
+{
+	const computers = data.computers;
+	let computer;
+
+	for( const x in Object.keys(computers) )
+	{
+		const name = Object.keys(computers)[x];
+		const obj = computers.name;
+
+		if( name === computerName )
+		{
+			computer = obj;
+			break;
+		}
+	}
+
+	return computer;
+}
+
+function selectComputer(computer)
+{
+	if( !computer )
+	{
+		return;
+	}
+
+	selectedComputer = JSON.parse(computer);
+	updateSelectedComputer();
+	changeContext(contexts.profiles);
+}
+
+function updateSelectedComputer()
+{
+	let text = selectedComputerTitle;
+
+	if(selectedComputer && selectedComputer.name)
+	{
+		text += selectedComputer.name;
+	}
+	else
+	{
+		text += "None";
+	}
+
+	document.querySelector("#selectedComputer").innerText = text;
+}
+
+let eventAdded = false;
+
+function searchFunc()
+{
+	if( eventAdded )
+	{
+		return;
+	}
+
+	const search = document.querySelector("#search");
+	search.addEventListener("input",updateSearch);
+	eventAdded = true;
+}
+
+function updateSearch()
+{
+	const searchTerm = document.querySelector("#search").value;
+	const rows = document.querySelectorAll(".profileRow");
+	console.log("Searching " + searchTerm);
+	const regex = new RegExp(searchTerm||".*","ig");
+
+	rows.forEach(function(){
+
+	});
+
+	for( const x in rows )
+	{
+		const row = rows[x];
+
+		if( !row || typeof row !== "object" || !row instanceof Element)
+		{
+			continue;
+		}
+
+		const rowName = row.querySelector(".profileName").innerText;
+
+		if( !rowName.match( regex ) )
+		{
+			console.log(rowName + " MATCH");
+			row.style.display = "none";
+		}
+		else
+		{
+			console.log(rowName);
+			row.style.display = "";
+		}
+	}
 }
