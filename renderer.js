@@ -224,14 +224,14 @@ function profileForm(form)
 	console.log(JSON.stringify(profile, null, "\t"));
 	writeData();
 
-	if(!newProfile)
+	/*if(!newProfile)
 	{
 		alert("Profile Updated!");
 	}
 	else
 	{
 		alert("Profile Added!");
-	}
+	}*/
 
 	changeContext(contexts.profiles);
 }
