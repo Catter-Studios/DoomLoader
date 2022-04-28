@@ -4,15 +4,44 @@ const path = require("path");
 const exec = require('child_process').exec;
 const root = document.querySelector("div#app");
 const contexts = {};
-const dataFile = "data.json";
+let dataFile = "../data.json";
 const selectedComputerTitle = "Selected Computer: ";
 let data;
 let selectedComputer;
 //refreshData();
 
+if(!fs.existsSync(dataFile))
+{
+	console.log("Data file not found");
+	const candidates = ["/Users/candice/Dropbox/SaveGames/doom/data.json", "c:/users/kixs_/dropbox/savegames/doom/data.json",
+	                    "c:/users/candice/dropbox/savegames/doom/data.json"];
+
+	for(const x in candidates)
+	{
+		const candidate = candidates[x];
+		console.log("Trying " + candidate);
+
+		try
+		{
+			if(fs.existsSync(candidate))
+			{
+				console.log("FOUND");
+				dataFile = candidate;
+				break;
+			}
+		}
+		catch(e)
+		{
+
+		}
+	}
+}
+
+console.log("FILE: " + dataFile);
+
 contexts.profiles = {
 	template: "profiles.pug",
-	func: searchFunc
+	func    : searchFunc
 };
 
 contexts.profile = {
@@ -214,27 +243,27 @@ function writeData()
 
 function sanitiseObject(obj)
 {
-	console.log("-----=====Before=====-----\n"+JSON.stringify(obj,null,"\t"));
-	if( !obj )
+	console.log("-----=====Before=====-----\n" + JSON.stringify(obj, null, "\t"));
+	if(!obj)
 	{
 		return obj;
 	}
 
 	const keys = Object.keys(obj);
 
-	for( const x in keys )
+	for(const x in keys)
 	{
 		const key = keys[x];
-		console.log( "Trying " + key );
-		switch( typeof obj[key] )
+		console.log("Trying " + key);
+		switch(typeof obj[key])
 		{
 			case "object":
 				console.log("OBJECT");
-				obj[key] = sanitiseObject( obj[key] );
+				obj[key] = sanitiseObject(obj[key]);
 				break;
 			case "string":
 				console.log("STRING");
-				obj[key] = sanitise( obj[key] );
+				obj[key] = sanitise(obj[key]);
 				break;
 			default:
 				//Leave alone
@@ -242,14 +271,14 @@ function sanitiseObject(obj)
 				break;
 		}
 	}
-	console.log("-----=====After=====-----\n"+JSON.stringify(obj,null,"\t"));
+	console.log("-----=====After=====-----\n" + JSON.stringify(obj, null, "\t"));
 	return obj;
 }
 
 function refresh()
 {
 	changeContext(currentContext);
-	window.scrollTo(0,0);
+	window.scrollTo(0, 0);
 }
 
 function getProfile(name)
@@ -259,12 +288,12 @@ function getProfile(name)
 	const arr = data.profiles;
 	const keys = Object.keys(arr);
 
-	for( const x in keys )
+	for(const x in keys)
 	{
 		const key = keys[x];
 		const val = arr[key];
 
-		if( val.name === name )
+		if(val.name === name)
 		{
 			selected = val;
 			break;
@@ -278,14 +307,14 @@ function getProfile(name)
 
 function doom(profileName)
 {
-	const profile = getProfile(profileName );
+	const profile = getProfile(profileName);
 
 	if(!profile)
 	{
 		return;
 	}
 
-	if( !selectedComputer )
+	if(!selectedComputer)
 	{
 		alert("You have not selected a computer yet.");
 		return;
@@ -294,7 +323,7 @@ function doom(profileName)
 	const computer = selectedComputer;
 
 	console.log("-----=====DOOM=====-----");
-	console.log("Profile: " + JSON.stringify(profile) );
+	console.log("Profile: " + JSON.stringify(profile));
 	console.log("Computer: " + JSON.stringify(selectedComputer));
 
 	const dir = path.resolve(computer.dir);
@@ -362,9 +391,10 @@ function doom(profileName)
 	console.log(command);
 	console.log("BEFORE: " + JSON.stringify(data.profiles));
 
-	data.profiles = data.profiles.filter(function(ele){
-		return ele != profile;
-	});
+	data.profiles = data.profiles.filter(function(ele)
+	                                     {
+		                                     return ele != profile;
+	                                     });
 
 	data.profiles.unshift(profile);
 
@@ -378,7 +408,8 @@ function doom(profileName)
 	});
 }
 
-function escape(htmlStr) {
+function escape(htmlStr)
+{
 	return htmlStr.replace(/&/g, "&amp;")
 	              .replace(/</g, "&lt;")
 	              .replace(/>/g, "&gt;")
@@ -387,26 +418,27 @@ function escape(htmlStr) {
 
 }
 
-function unEscape(htmlStr) {
-	htmlStr = htmlStr.replace(/&lt;/g , "<");
-	htmlStr = htmlStr.replace(/&gt;/g , ">");
-	htmlStr = htmlStr.replace(/&quot;/g , "\"");
-	htmlStr = htmlStr.replace(/&#39;/g , "\'");
-	htmlStr = htmlStr.replace(/&amp;/g , "&");
+function unEscape(htmlStr)
+{
+	htmlStr = htmlStr.replace(/&lt;/g, "<");
+	htmlStr = htmlStr.replace(/&gt;/g, ">");
+	htmlStr = htmlStr.replace(/&quot;/g, "\"");
+	htmlStr = htmlStr.replace(/&#39;/g, "\'");
+	htmlStr = htmlStr.replace(/&amp;/g, "&");
 	return htmlStr;
 }
 
 function sanitise(str)
 {
-	if( !str || typeof str !== "string" )
+	if(!str || typeof str !== "string")
 	{
 		return str;
 	}
 
-	console.log("Before str: " + str );
-	str = str.replaceAll(/'/ig,"\\\'");
-	str = str.replaceAll(/"/ig,"\\\"");
-	console.log("After str: " + str );
+	console.log("Before str: " + str);
+	str = str.replaceAll(/'/ig, "\\\'");
+	str = str.replaceAll(/"/ig, "\\\"");
+	console.log("After str: " + str);
 	return str;
 }
 
@@ -417,7 +449,7 @@ function sanitisePath(str)
 		return str;
 	}
 
-	if( path )
+	if(path)
 	{
 		str = str.replaceAll("/", path.sep);
 		str = str.replaceAll("\\", path.sep);
@@ -462,12 +494,12 @@ function getComputer(computerName)
 	const computers = data.computers;
 	let computer;
 
-	for( const x in Object.keys(computers) )
+	for(const x in Object.keys(computers))
 	{
 		const name = Object.keys(computers)[x];
 		const obj = computers.name;
 
-		if( name === computerName )
+		if(name === computerName)
 		{
 			computer = obj;
 			break;
@@ -479,7 +511,7 @@ function getComputer(computerName)
 
 function selectComputer(computer)
 {
-	if( !computer )
+	if(!computer)
 	{
 		return;
 	}
@@ -508,7 +540,7 @@ function updateSelectedComputer()
 function searchFunc()
 {
 	const search = document.querySelector("#search");
-	search.addEventListener("input",updateSearch);
+	search.addEventListener("input", updateSearch);
 }
 
 function updateSearch()
@@ -516,24 +548,25 @@ function updateSearch()
 	const searchTerm = document.querySelector("#search").value;
 	const rows = document.querySelectorAll(".profileRow");
 	console.log("Searching " + searchTerm);
-	const regex = new RegExp(searchTerm||".*","ig");
+	const regex = new RegExp(searchTerm || ".*", "ig");
 
-	rows.forEach(function(){
+	rows.forEach(function()
+	             {
 
-	});
+	             });
 
-	for( const x in rows )
+	for(const x in rows)
 	{
 		const row = rows[x];
 
-		if( !row || typeof row !== "object" || !row instanceof Element)
+		if(!row || typeof row !== "object" || !row instanceof Element)
 		{
 			continue;
 		}
 
 		const rowName = row.querySelector(".profileName").innerText;
 
-		if( !rowName.match( regex ) )
+		if(!rowName.match(regex))
 		{
 			console.log(rowName + " MATCH");
 			row.style.display = "none";
