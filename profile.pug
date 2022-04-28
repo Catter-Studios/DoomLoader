@@ -39,4 +39,4 @@ form(id="profileForm")
 					option(value=key)
 						=key
 	button(name="save" type="submit" formaction="javascript:profileForm(document.getElementById('profileForm'));") Save
-	button(name="cancel" formaction="") Cancel
+	button(name="cancel" formaction="javascript:changeContext(contexts.profiles);") Cancel

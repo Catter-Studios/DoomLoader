@@ -505,18 +505,10 @@ function updateSelectedComputer()
 	document.querySelector("#selectedComputer").innerText = text;
 }
 
-let eventAdded = false;
-
 function searchFunc()
 {
-	if( eventAdded )
-	{
-		return;
-	}
-
 	const search = document.querySelector("#search");
 	search.addEventListener("input",updateSearch);
-	eventAdded = true;
 }
 
 function updateSearch()
