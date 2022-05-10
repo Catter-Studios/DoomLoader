@@ -4,45 +4,22 @@ const path = require("path");
 const exec = require('child_process').exec;
 const root = document.querySelector("div#app");
 const contexts = {};
-let dataFile = "data/data.json";
+let dataFile = "../data/data.json";
 const selectedComputerTitle = "Selected Computer: ";
 let data;
 let selectedComputer;
 let contextInput;
 //refreshData();
 
-if(!fs.existsSync(dataFile))
-{
-	console.log("Data file not found");
-	const candidates = ["/Users/candice/Dropbox/SaveGames/doom-refactor/data/newdata.json", "c:/users/kixs_/dropbox/savegames/doom-refactor/data/newdata.json",
-	                    "c:/Users/candice/Dropbox/SaveGames/doom-refactor/data/newdata.json"];
-
-	for(const x in candidates)
-	{
-		const candidate = candidates[x];
-		console.log("Trying " + candidate);
-
-		try
-		{
-			if(fs.existsSync(candidate))
-			{
-				console.log("FOUND");
-				dataFile = candidate;
-				break;
-			}
-		}
-		catch(e)
-		{
-
-		}
-	}
+if (!fs.existsSync(dataFile)) {
+	alert("Cannot find data file in " + (__dirname + "/" + dataFile));
 }
 
-console.log("FILE: " + dataFile);
+//console.log("FILE: " + dataFile);
 
 contexts.profiles = {
 	template: "profiles.pug",
-	func    : searchFunc
+	func: searchFunc
 };
 
 contexts.profile = {
@@ -51,7 +28,7 @@ contexts.profile = {
 
 contexts.addProfile = {
 	template: "profile.pug",
-	func    : addProfile
+	func: addProfile
 };
 
 contexts.computers = {
@@ -88,58 +65,50 @@ contexts.sourceport = {
 
 let currentContext;
 
-function addProfile()
-{
+function addProfile() {
 	editProfile("{}");
 	const form = document.getElementById("profileForm");
 	form["name"].removeAttribute("disabled");
 }
 
-function deleteProfile(profile)
-{
+function deleteProfile(profile) {
 	data.profiles.splice(data.profiles.indexOf(profile));
 	writeData();
 	refresh();
 }
 
-function changeContext(context, input = null)
-{
+function changeContext(context, input = null) {
 	currentContext = context;
 	contextInput = input;
 	const func = context.func;
 	const pugFunc = context.pugFunc;
 
-	if(!input)
-	{
+	if (!input) {
 		refreshData();
 		input = data;
 	}
 
-	if(!input)
-	{
-		console.log("Data refresh failed");
+	if (!input) {
+		//console.log("Data refresh failed");
 		return;
 	}
 
 	const html = pugFunc(input);
 	root.innerHTML = html;
 
-	if(func)
-	{
+	if (func) {
 		func();
 	}
 }
 
-function loadFromFile(varName, fileName)
-{
+function loadFromFile(varName, fileName) {
 	let str = fs.readFileSync(fileName).toString() + " " + varName;
 	str = str.replaceAll(/export/ig, "");
 	const ret = eval(str);
 	return ret;
 }
 
-function refreshData()
-{
+function refreshData() {
 	data = JSON.parse(fs.readFileSync(dataFile).toString());
 }
 
@@ -147,26 +116,21 @@ compileAll();
 changeContext(contexts.computers);
 updateSelectedComputer();
 
-function compileAll()
-{
-	for(const [key, val] of Object.entries(contexts))
-	{
-		if(val.pugFunc)
-		{
+function compileAll() {
+	for (const [key, val] of Object.entries(contexts)) {
+		if (val.pugFunc) {
 			continue;
 		}
 
-		if(!fs.existsSync(val.template))
-		{
-			console.log("Cannot find " + val.template);
+		if (!fs.existsSync(val.template)) {
+			//console.log("Cannot find " + val.template);
 			continue;
 		}
 
-		console.log("Compiling " + val.template);
+		//console.log("Compiling " + val.template);
 		const pugFunc = pug.compileFile(val.template);
 
-		if(!pugFunc)
-		{
+		if (!pugFunc) {
 			throw "Error during pugFunc creation.";
 		}
 
@@ -174,26 +138,23 @@ function compileAll()
 	}
 }
 
-function editProfile(profile)
-{
+function editProfile(profile) {
 	changeContext(contexts.profile, {
-		data   : data,
+		data: data,
 		profile: JSON.parse(profile)
 	});
-	console.log("Editing profile> " + JSON.stringify(profile));
+	//console.log("Editing profile> " + JSON.stringify(profile));
 }
 
-function editComputer(computer)
-{
+function editComputer(computer) {
 	changeContext(contexts.computer, {
-		data    : data,
+		data: data,
 		computer: JSON.parse(computer)
 	});
-	console.log("Editing computer> " + JSON.stringify(computer));
+	//console.log("Editing computer> " + JSON.stringify(computer));
 }
 
-function profileForm(form)
-{
+function profileForm(form) {
 	const name = form["name"].value;
 	const sourceport = form["sourceport"].value;
 	const iwad = form["iwad"].value;
@@ -201,8 +162,7 @@ function profileForm(form)
 	let profile = getProfile(name);
 	let newProfile = false;
 
-	if(!profile)
-	{
+	if (!profile) {
 		profile = {};
 		data.profiles.push(profile);
 		newProfile = true;
@@ -213,17 +173,15 @@ function profileForm(form)
 	profile.iwad = iwad;
 	profile.autoloadProfile = autoloadProfile;
 
-	if(form["options"])
-	{
+	if (form["options"]) {
 		profile.options = contract(form["options"].value);
 	}
 
-	if(form["wads"])
-	{
+	if (form["wads"]) {
 		profile.wads = form["wads"].value;
 	}
 
-	console.log(JSON.stringify(profile, null, "\t"));
+	//console.log(JSON.stringify(profile, null, "\t"));
 	writeData();
 
 	/*if(!newProfile)
@@ -238,113 +196,113 @@ function profileForm(form)
 	changeContext(contexts.profiles);
 }
 
-function writeData()
-{
-	fs.writeFileSync(dataFile, JSON.stringify(data,null,"\t"));
+function writeData() {
+	fs.writeFileSync(dataFile, JSON.stringify(data, null, "\t"));
 }
 
-function sanitiseObject(obj)
-{
-	console.log("-----=====Before=====-----\n" + JSON.stringify(obj, null, "\t"));
-	if(!obj)
-	{
+function sanitiseObject(obj) {
+	//console.log("-----=====Before=====-----\n" + JSON.stringify(obj, null, "\t"));
+	if (!obj) {
 		return obj;
 	}
 
 	const keys = Object.keys(obj);
 
-	for(const x in keys)
-	{
+	for (const x in keys) {
 		const key = keys[x];
-		console.log("Trying " + key);
-		switch(typeof obj[key])
-		{
+		//console.log("Trying " + key);
+		switch (typeof obj[key]) {
 			case "object":
-				console.log("OBJECT");
+				//console.log("OBJECT");
 				obj[key] = sanitiseObject(obj[key]);
 				break;
 			case "string":
-				console.log("STRING");
+				//console.log("STRING");
 				obj[key] = sanitise(obj[key]);
 				break;
 			default:
 				//Leave alone
-				console.log("OTHER");
+				//console.log("OTHER");
 				break;
 		}
 	}
-	console.log("-----=====After=====-----\n" + JSON.stringify(obj, null, "\t"));
+	//console.log("-----=====After=====-----\n" + JSON.stringify(obj, null, "\t"));
 	return obj;
 }
 
-function refresh(input=contextInput)
-{
-	changeContext(currentContext,contextInput);
+function refresh(input = contextInput) {
+	changeContext(currentContext, contextInput);
 	window.scrollTo(0, 0);
 }
 
-function getProfile(name)
-{
-	console.log(`Finding profile ${name}`);
+function getProfile(name) {
+	//console.log(`Finding profile ${name}`);
 	let selected;
 	const arr = data.profiles;
 	const keys = Object.keys(arr);
 
-	for(const x in keys)
-	{
+	for (const x in keys) {
 		const key = keys[x];
 		const val = arr[key];
 
-		if(val.name === name)
-		{
+		if (val.name === name) {
 			selected = val;
 			break;
 		}
 	}
 
-	console.log("Result: " + JSON.stringify(selected));
+	//console.log("Result: " + JSON.stringify(selected));
 
 	return selected;
 }
 
-function doom(profileName)
-{
+function checkWads(wads, dir) {
+	for (const i in wads) {
+		const wad = wads[i];
+		console.log("Checking " + dir + "/" + wad);
+
+		if (!fs.existsSync(dir + "/" + wad)) {
+			console.log("Not found");
+			alert("Cannot find " + wad);
+			throw "Cannot find " + wad;
+			return;
+		}
+		console.log("Found");
+	}
+}
+
+function doom(profileName) {
 	const profile = getProfile(profileName);
 
-	if(!profile)
-	{
+	if (!profile) {
 		return;
 	}
 
-	if(!selectedComputer)
-	{
+	if (!selectedComputer) {
 		alert("You have not selected a computer yet.");
 		return;
 	}
 
 	const computer = selectedComputer;
 
-	console.log("-----=====DOOM=====-----");
-	console.log("Profile: " + JSON.stringify(profile));
-	console.log("Computer: " + JSON.stringify(selectedComputer));
+	//console.log("-----=====DOOM=====-----");
+	//console.log("Profile: " + JSON.stringify(profile));
+	//console.log("Computer: " + JSON.stringify(selectedComputer));
 
 	const dir = path.resolve(computer.dir);
 
-	if(!path.isAbsolute(dir))
-	{
+	if (!path.isAbsolute(dir)) {
 		throw "Error: Base directory 'dir' must be absolute.";
 	}
 
 	const sourceport = data.sourceports[profile.sourceport];
 	let sourceportPath = sanitisePath(sourceport.paths[computer.os]);
 
-	if(!path.isAbsolute(sourceportPath))
-	{
+	if (!path.isAbsolute(sourceportPath)) {
 		sourceportPath = path.join(dir, sourceportPath);
 	}
 
-	if(!fs.existsSync(sourceportPath))
-	{
+	if (!fs.existsSync(sourceportPath)) {
 		throw "Cannot find sourceport at '" + sourceportPath + "'";
 	}
 
@@ -352,13 +310,14 @@ function doom(profileName)
 
 	const iwad = sanitise(data.iwads[profile.iwad]);
 	const extraOptions = sanitise(computer.extraOptions);
-	const pwads = sanitise(profile.wads.join(" "));
+	const wads = profile.wads;
+	checkWads(wads, dir);
+	const pwads = sanitise(wads.join(" "));
 	//const pwads = sanitise(profile.wads);
 	const profileOptions = sanitise(profile.options);
 	const sourceportOptions = sanitise(sourceport.options);
 
-	if(sourceportOptions)
-	{
+	if (sourceportOptions) {
 		command += " " + sourceportOptions;
 	}
 
@@ -366,74 +325,67 @@ function doom(profileName)
 
 	let files;
 
-	if(profile.autoloadProfile)
-	{
+	if (profile.autoloadProfile) {
 		const autoloadProfile = data.autoloadProfiles[profile.autoloadProfile];
 		//const before = sanitise(autoloadProfile.before));
 		//const after = sanitise(autoloadProfile.after);
 		//files = before + " " + pwads + " " + after;
 
-		if( autoloadProfile.before )
-		{
+		if (autoloadProfile.before) {
+			checkWads(autoloadProfile.before, dir);
 			files = sanitise(autoloadProfile.before.join(" ")) + " " + pwads;
 		}
 
-		if( autoloadProfile.after )
-		{
+		if (autoloadProfile.after) {
+			checkWads(autoloadProfile.after, dir);
 			files = pwads + " " + sanitise(autoloadProfile.after.join(" "));
 		}
-	}
-	else
-	{
+	} else {
 		files = pwads;
 	}
 
 	command += " -file " + files;
 
-	if(extraOptions)
-	{
+	if (extraOptions) {
 		command += " " + extraOptions;
 	}
 
-	if(profileOptions)
-	{
+	if (profileOptions) {
 		command += " " + profileOptions;
 	}
 
-	console.log(command);
-	console.log("BEFORE: " + JSON.stringify(data.profiles));
+	//console.log(command);
+	//console.log("BEFORE: " + JSON.stringify(data.profiles));
 
-	data.profiles = data.profiles.filter(function(ele)
-	                                     {
-		                                     return ele != profile;
-	                                     });
+	data.profiles = data.profiles.filter(function(ele) {
+		return ele != profile;
+	});
 
 	data.profiles.unshift(profile);
 
-	console.log("AFTER: " + JSON.stringify(data.profiles));
+	//console.log("AFTER: " + JSON.stringify(data.profiles));
 	writeData();
 	refresh();
 
 	console.log("DOOM COMMAND: " + command);
 
-	exec(command, {cwd: dir}, () =>
-	{
+	exec(command, {
+		cwd: dir
+	}, () => {
 		//Do nothing
 	});
 }
 
-function escape(htmlStr)
-{
+function escape(htmlStr) {
 	return htmlStr.replace(/&/g, "&amp;")
-	              .replace(/</g, "&lt;")
-	              .replace(/>/g, "&gt;")
-	              .replace(/"/g, "&quot;")
-	              .replace(/'/g, "&#39;");
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
 
 }
 
-function unEscape(htmlStr)
-{
+function unEscape(htmlStr) {
 	htmlStr = htmlStr.replace(/&lt;/g, "<");
 	htmlStr = htmlStr.replace(/&gt;/g, ">");
 	htmlStr = htmlStr.replace(/&quot;/g, "\"");
@@ -442,29 +394,24 @@ function unEscape(htmlStr)
 	return htmlStr;
 }
 
-function sanitise(str)
-{
-	if(!str || typeof str !== "string")
-	{
+function sanitise(str) {
+	if (!str || typeof str !== "string") {
 		return str;
 	}
 
-	console.log("Before str: " + str);
+	//console.log("Before str: " + str);
 	str = str.replaceAll(/'/ig, "\\\'");
 	str = str.replaceAll(/"/ig, "\\\"");
-	console.log("After str: " + str);
+	//console.log("After str: " + str);
 	return str;
 }
 
-function sanitisePath(str)
-{
-	if(!str)
-	{
+function sanitisePath(str) {
+	if (!str) {
 		return str;
 	}
 
-	if(path)
-	{
+	if (path) {
 		str = str.replaceAll("/", path.sep);
 		str = str.replaceAll("\\", path.sep);
 	}
@@ -472,49 +419,37 @@ function sanitisePath(str)
 	return str;
 }
 
-function expand(str = "")
-{
+function expand(str = "") {
 	return str.replaceAll(/(?<!\\|[\+-]\w+) /g, "\n");
 }
 
-function countLines(str = "")
-{
+function countLines(str = "") {
 	str = str.trim();
 
-	if(str.match(/^\s*$/g))
-	{
+	if (str.match(/^\s*$/g)) {
 		return 0;
-	}
-	else
-	{
-		if(str.match(/\n/g))
-		{
+	} else {
+		if (str.match(/\n/g)) {
 			return str.match(/\n/g).length;
-		}
-		else
-		{
+		} else {
 			return 1;
 		}
 	}
 }
 
-function contract(str = "")
-{
+function contract(str = "") {
 	return str.replaceAll(/\n/g, " ");
 }
 
-function getComputer(computerName)
-{
+function getComputer(computerName) {
 	const computers = data.computers;
 	let computer;
 
-	for(const x in Object.keys(computers))
-	{
+	for (const x in Object.keys(computers)) {
 		const name = Object.keys(computers)[x];
 		const obj = computers.name;
 
-		if(name === computerName)
-		{
+		if (name === computerName) {
 			computer = obj;
 			break;
 		}
@@ -523,10 +458,8 @@ function getComputer(computerName)
 	return computer;
 }
 
-function selectComputer(computer)
-{
-	if(!computer)
-	{
+function selectComputer(computer) {
+	if (!computer) {
 		return;
 	}
 
@@ -535,108 +468,93 @@ function selectComputer(computer)
 	changeContext(contexts.profiles);
 }
 
-function updateSelectedComputer()
-{
+function updateSelectedComputer() {
 	let text = selectedComputerTitle;
 
-	if(selectedComputer && selectedComputer.name)
-	{
+	if (selectedComputer && selectedComputer.name) {
 		text += selectedComputer.name;
-	}
-	else
-	{
+	} else {
 		text += "None";
 	}
 
 	document.querySelector("#selectedComputer").innerText = text;
 }
 
-function searchFunc()
-{
+function searchFunc() {
 	const search = document.querySelector("#search");
 	search.addEventListener("input", updateSearch);
 }
 
-function updateSearch()
-{
+function updateSearch() {
 	const searchTerm = document.querySelector("#search").value;
 	const rows = document.querySelectorAll(".profileRow");
-	console.log("Searching " + searchTerm);
+	//console.log("Searching " + searchTerm);
 	const regex = new RegExp(searchTerm || ".*", "ig");
 
-	rows.forEach(function()
-	             {
+	rows.forEach(function() {
 
-	             });
+	});
 
-	for(const x in rows)
-	{
+	for (const x in rows) {
 		const row = rows[x];
 
-		if(!row || typeof row !== "object" || !row instanceof Element)
-		{
+		if (!row || typeof row !== "object" || !row instanceof Element) {
 			continue;
 		}
 
 		const rowName = row.querySelector(".profileName").innerText;
 
-		if(!rowName.match(regex))
-		{
-			console.log(rowName + " MATCH");
+		if (!rowName.match(regex)) {
+			//console.log(rowName + " MATCH");
 			row.style.display = "none";
-		}
-		else
-		{
-			console.log(rowName);
+		} else {
+			//console.log(rowName);
 			row.style.display = "";
 		}
 	}
 }
 
-function addWad(profileName, files)
-{
+function addWad(profileName, files) {
 	const profile = getProfile(profileName);
-	const profileIndex = data.profiles.findIndex((item)=>item.name===profileName);
+	const profileIndex = data.profiles.findIndex((item) => item.name === profileName);
 	const table = document.getElementsByTagName("table")[0];
 	const dir = path.resolve(selectedComputer.dir);
 	const fileInput = document.getElementById("newWad");
 
-	for( let i = 0; i < files.length; i++ )
-	{
+	for (let i = 0; i < files.length; i++) {
 		const file = files[i];
 		let path = file.path;
-		path = path.replace(dir+"/","");
+		path = path.replace(dir + "/", "");
 		data.profiles[profileIndex].wads.push(path);
 
 		// Create an empty <tr> element and add it to the 1st position of the table:
 		var row = table.insertRow(-1);
-		row.id = ("wad"+path);
-/*
-				tr(class="wadRow" id="wad"+wad)
-					td
-						button(name="deleteWad" formaction="javascript:deleteWad(\""+profile.name+"\",\""+wad+"\")") Delete
-					td
-						span
-							=wad
-*/
+		row.id = ("wad" + path);
+		/*
+						tr(class="wadRow" id="wad"+wad)
+							td
+								button(name="deleteWad" formaction="javascript:deleteWad(\""+profile.name+"\",\""+wad+"\")") Delete
+							td
+								span
+									=wad
+		*/
 		var cell1 = row.insertCell(0);
 		var cell2 = row.insertCell(1);
 
 		// Add some text to the new cells:
-		cell1.innerHTML = "<button name='deleteWad' formaction='javascript:deleteWad(\""+profileName+"\",\""+path+"\")'>Delete</button>";
+		cell1.innerHTML = "<button name='deleteWad' formaction='javascript:deleteWad(\"" + profileName + "\",\"" + path + "\")'>Delete</button>";
 		cell2.innerHTML = "<span>" + path + "</span>";
 	}
 
 	fileInput.value = null;
 }
 
-function deleteWad(profileName, wadName)
-{
-	const profileIndex = data.profiles.findIndex((item)=>item.name===profileName);
+function deleteWad(profileName, wadName) {
+	const profileIndex = data.profiles.findIndex((item) => item.name === profileName);
 	data.profiles[profileIndex].wads.splice(data.profiles[profileIndex].wads.indexOf(wadName));
 	const table = document.getElementsByTagName("table")[0];
 	const rows = table.rows;
-	const item = rows.namedItem("wad"+wadName);
+	const item = rows.namedItem("wad" + wadName);
 	const rowIndex = item.rowIndex;
 	table.deleteRow(rowIndex);
 }
