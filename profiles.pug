@@ -15,8 +15,9 @@ table
 		//th Name
 	each profile in profiles
 		tr(class="profileRow")
-			td
-				button(onclick="doom('" + sanitise(profile.name) + "')") Run
+			if selectedComputer
+				td
+					button(onclick="doom('" + sanitise(profile.name) + "')") Run
 			td
 				button(onclick="editProfile('" + sanitise(JSON.stringify(profile)) + "')") Edit
 			td
