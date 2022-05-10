@@ -252,7 +252,7 @@ function computerForm(form)
 	computer.options = options;
 
 	writeData();
-	changeContext(contexts.profiles);
+	changeContext(contexts.computers);
 }
 
 function addComputer()
