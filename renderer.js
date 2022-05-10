@@ -353,10 +353,16 @@ function profileForm(form)
 		profile.options = form["options"].value;
 	}
 
-	if(form["wads"])
+	const wadElements = document.querySelectorAll("form#profileForm input.wad");
+	const wads = [];
+
+	for( let i = 0; i < wadElements.length; i++ )
 	{
-		profile.wads = form["wads"].value;
+		const wadElement = wadElements[i];
+		wads.push(wadElement.value);
 	}
+
+	profile.wads = wads;
 
 	writeData();
 	changeContext(contexts.profiles);
@@ -364,7 +370,7 @@ function profileForm(form)
 
 function addProfile()
 {
-	editProfile("{}");
+	editProfile("{\"wads\":[]}");
 	const form = document.getElementById("profileForm");
 	form["name"].removeAttribute("disabled");
 }
@@ -710,8 +716,8 @@ function updateSearch()
 
 function addWad(profileName, files)
 {
-	const profile = getProfile(profileName);
-	const profileIndex = data.profiles.findIndex((item) => item.name === profileName);
+	//const profile = getProfile(profileName);
+	//const profileIndex = data.profiles.findIndex((item) => item.name === profileName);
 	const table = document.getElementsByTagName("table")[0];
 	const dir = path.resolve(selectedComputer.dir);
 	const fileInput = document.getElementById("newWad");
@@ -721,7 +727,7 @@ function addWad(profileName, files)
 		const file = files[i];
 		let path = file.path;
 		path = path.replace(dir + "/", "");
-		data.profiles[profileIndex].wads.push(path);
+		//data.profiles[profileIndex].wads.push(path);
 
 		// Create an empty <tr> element and add it to the 1st position of the table:
 		var row = table.insertRow(-1);
@@ -741,7 +747,7 @@ function addWad(profileName, files)
 		cell1.innerHTML =
 			"<button name='deleteWad' formaction='javascript:deleteWad(\"" + profileName + "\",\"" + path +
 			"\")'>Delete</button>";
-		cell2.innerHTML = "<span>" + path + "</span>";
+		cell2.innerHTML = "<input type='text' class='wad' size=40 disabled=true name='wads[]' value='"+path+"'>";
 	}
 
 	fileInput.value = null;

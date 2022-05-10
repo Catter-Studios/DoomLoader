@@ -23,14 +23,12 @@ form(id="profileForm")
 		input(type="text" name="options" size=70 value=profile.options || "")
 	p WADs:&nbsp;&nbsp;
 		table
-			if( profile.wads )
-				each wad in profile.wads
-					tr(class="wadRow" id="wad" + wad)
-						td
-							button(name="deleteWad" formaction="javascript:deleteWad(\"" + profile.name + "\",\"" + wad + "\")") Delete
-						td
-							span
-								=wad
+			each wad in profile.wads
+				tr(class="wadRow" id="wad" + wad)
+					td
+						button(name="deleteWad" formaction="javascript:deleteWad(\"" + profile.name + "\",\"" + wad + "\")") Delete
+					td
+						input(type="text" class="wad" name="wads" disabled="true" size=40 value=wad)
 	p Add Wad:&nbsp;&nbsp;
 		input(type="file" name="newWad" id="newWad" accept=".pk3,.pk7,.wad,.zip" onchange="addWad(\"" + profile.name + "\",this.files);" )
 	p Autoload Profile:&nbsp;&nbsp;

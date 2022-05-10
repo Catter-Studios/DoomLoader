@@ -27,4 +27,4 @@ table
 			//td= profile.iwad
 			//td= profile.wads
 			//td= profile.autoloadProfile
-button(onclick="addProfile()") Add Profile
+button(onclick="if(selectedComputer){addProfile()}else{alert(\"You must select a computer first\");}") Add Profile
