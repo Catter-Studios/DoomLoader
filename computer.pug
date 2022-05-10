@@ -2,7 +2,7 @@ form(id="computerForm")
 	p Name:&nbsp;&nbsp;
 		input(type="text", disabled="true", name="name", size=50, value=(computer.name || ""))
 	p Dir:&nbsp;&nbsp;
-		input(type="text" size=50 name="dir" value=computer.dir)
+		input(type="text" size=50 name="dir" value=(computer.dir||""))
 	p OS:&nbsp;&nbsp;
 		select(name="os")
 			if(computer.os === "mac")
@@ -19,8 +19,11 @@ form(id="computerForm")
 				option(value="linux" selected) Linux
 			else
 				option(value="linux") Linux
-	p Extra Options:&nbsp;&nbsp;
-		- const text = expand(computer.extraOptions);
-		- const lines = countLines(text)+3;
-		textarea(name="extraOptions" cols=60 height="auto" rows=Math.min(5,lines) oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
-			=text
+	p Options:&nbsp;&nbsp;
+		each name in Object.keys(data.sourceports)
+			- const sourceport = data.sourceports[name]
+			- if( !computer.options ) computer.options={};
+			p(style="margin-left:30px;")= name
+				input( type="text" name="options"+name value=computer.options[name]||"" size=70 )
+	button(name="save" type="submit" formaction="javascript:computerForm(document.getElementById('computerForm'));") Save
+	button(name="cancel" formaction="javascript:changeContext(contexts.computers);") Cancel

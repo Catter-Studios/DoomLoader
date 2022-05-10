@@ -12,12 +12,12 @@ function windowOptions(title)
 		width         : 800,
 		height        : 600,
 		webPreferences: {
-			preload: path.join(__dirname, 'preload.js'),
-			nodeIntegration: true,
+			preload         : path.join(__dirname, 'preload.js'),
+			nodeIntegration : true,
 			contextIsolation: false
 		},
-		title:title
-	}
+		title         : title
+	};
 }
 
 // This method will be called when Electron has finished

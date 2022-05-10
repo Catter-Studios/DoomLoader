@@ -1,10 +1,10 @@
 form(id="profileForm")
 	p Name:&nbsp;&nbsp;
-		input(type="text", disabled="true", name="name", size=50, value=(profile.name||""))
+		input(type="text", disabled="true", name="name", size=50, value=(profile.name || ""))
 	p Source Port:&nbsp;&nbsp;
 		select(name="sourceport")
 			each key in Object.keys(data.sourceports)
-				if(profile.sourceport === key )
+				if(profile.sourceport === key)
 					option(value=key selected)
 						=key
 				else
@@ -13,32 +13,29 @@ form(id="profileForm")
 	p IWad:&nbsp;&nbsp;
 		select(name="iwad")
 			each key in Object.keys(data.iwads)
-				if(profile.iwad === key )
+				if(profile.iwad === key)
 					option(value=key selected)
 						=key
 				else
 					option(value=key)
 						=key
 	p Options:&nbsp;&nbsp;
-		- const text = expand(profile.options);
-		- const lines = countLines(text)+3;
-		textarea(name="options" cols=60 height="auto" rows=Math.min(5,lines) oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
-			=(profile.options||"")
+		input(type="text" name="options" size=70 value=profile.options || "")
 	p WADs:&nbsp;&nbsp;
 		table
 			each wad in profile.wads
-				tr(class="wadRow" id="wad"+wad)
+				tr(class="wadRow" id="wad" + wad)
 					td
-						button(name="deleteWad" formaction="javascript:deleteWad(\""+profile.name+"\",\""+wad+"\")") Delete
+						button(name="deleteWad" formaction="javascript:deleteWad(\"" + profile.name + "\",\"" + wad + "\")") Delete
 					td
 						span
 							=wad
 	p Add Wad:&nbsp;&nbsp;
-		input(type="file" name="newWad" id="newWad" accept=".pk3,.pk7,.wad,.zip" onchange="addWad(\""+profile.name+"\",this.files);" )
+		input(type="file" name="newWad" id="newWad" accept=".pk3,.pk7,.wad,.zip" onchange="addWad(\"" + profile.name + "\",this.files);" )
 	p Autoload Profile:&nbsp;&nbsp;
 		select(name="autoloadProfile")
 			each key in Object.keys(data.autoloadProfiles)
-				if(profile.autoloadProfile===key)
+				if(profile.autoloadProfile === key)
 					option(value=key selected)
 						=key
 				else

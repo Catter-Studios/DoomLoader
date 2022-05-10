@@ -5,5 +5,7 @@ table
 				button(onclick="selectComputer('" + sanitise(JSON.stringify(computer)) + "')") Select
 			td
 				button(onclick="editComputer('" + sanitise(JSON.stringify(computer)) + "')") Edit
+			td
+				button(onclick="deleteComputer('" + sanitise(JSON.stringify(computer)) + "')") Delete
 			td= computer.name
 button(onclick="addComputer()") Add Computer

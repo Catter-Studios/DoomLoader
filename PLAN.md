@@ -1,13 +1,14 @@
 #Modules
+
 * Profiles
-  * Run Button
+	* Run Button
 * Computers
-  * Paste options or list?
+	* Paste options or list?
 * WADs
-  * And PK3s (autodetect or?)
+	* And PK3s (autodetect or?)
 * iWADs
-  * Autodetect, paste, or list?
+	* Autodetect, paste, or list?
 * SourcePorts
-  * Maybe only support one at a time?
+	* Maybe only support one at a time?
 * Autoload Profiles
-  * Needs before wads and after wads sections
+	* Needs before wads and after wads sections
