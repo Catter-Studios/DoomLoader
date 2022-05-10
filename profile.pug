@@ -19,16 +19,22 @@ form(id="profileForm")
 				else
 					option(value=key)
 						=key
-	p Extra Options:&nbsp;&nbsp;
+	p Options:&nbsp;&nbsp;
 		- const text = expand(profile.options);
 		- const lines = countLines(text)+3;
 		textarea(name="options" cols=60 height="auto" rows=Math.min(5,lines) oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
 			=(profile.options||"")
-	p WADs:&nbsp;&nbsp
-		- const text2 = expand(profile.wads);
-		- const lines2 = countLines(text2)+3;
-		textarea(name="wads" cols=60 height="auto" rows=Math.min(5,lines2) oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
-			=text2
+	p WADs:&nbsp;&nbsp;
+		table
+			each wad in profile.wads
+				tr(class="wadRow" id="wad"+wad)
+					td
+						button(name="deleteWad" formaction="javascript:deleteWad(\""+profile.name+"\",\""+wad+"\")") Delete
+					td
+						span
+							=wad
+	p Add Wad:&nbsp;&nbsp;
+		input(type="file" name="newWad" id="newWad" accept=".pk3,.pk7,.wad,.zip" onchange="addWad(\""+profile.name+"\",this.files);" )
 	p Autoload Profile:&nbsp;&nbsp;
 		select(name="autoloadProfile")
 			each key in Object.keys(data.autoloadProfiles)

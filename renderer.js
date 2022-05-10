@@ -4,17 +4,18 @@ const path = require("path");
 const exec = require('child_process').exec;
 const root = document.querySelector("div#app");
 const contexts = {};
-let dataFile = "../data.json";
+let dataFile = "data/data.json";
 const selectedComputerTitle = "Selected Computer: ";
 let data;
 let selectedComputer;
+let contextInput;
 //refreshData();
 
 if(!fs.existsSync(dataFile))
 {
 	console.log("Data file not found");
-	const candidates = ["/Users/candice/Dropbox/SaveGames/doom/data.json", "c:/users/kixs_/dropbox/savegames/doom/data.json",
-	                    "c:/users/candice/dropbox/savegames/doom/data.json"];
+	const candidates = ["/Users/candice/Dropbox/SaveGames/doom-refactor/data/newdata.json", "c:/users/kixs_/dropbox/savegames/doom-refactor/data/newdata.json",
+	                    "c:/Users/candice/Dropbox/SaveGames/doom-refactor/data/newdata.json"];
 
 	for(const x in candidates)
 	{
@@ -104,6 +105,7 @@ function deleteProfile(profile)
 function changeContext(context, input = null)
 {
 	currentContext = context;
+	contextInput = input;
 	const func = context.func;
 	const pugFunc = context.pugFunc;
 
@@ -218,7 +220,7 @@ function profileForm(form)
 
 	if(form["wads"])
 	{
-		profile.wads = contract(form["wads"].value);
+		profile.wads = form["wads"].value;
 	}
 
 	console.log(JSON.stringify(profile, null, "\t"));
@@ -238,7 +240,7 @@ function profileForm(form)
 
 function writeData()
 {
-	fs.writeFileSync(dataFile, JSON.stringify(data));
+	fs.writeFileSync(dataFile, JSON.stringify(data,null,"\t"));
 }
 
 function sanitiseObject(obj)
@@ -275,9 +277,9 @@ function sanitiseObject(obj)
 	return obj;
 }
 
-function refresh()
+function refresh(input=contextInput)
 {
-	changeContext(currentContext);
+	changeContext(currentContext,contextInput);
 	window.scrollTo(0, 0);
 }
 
@@ -350,7 +352,8 @@ function doom(profileName)
 
 	const iwad = sanitise(data.iwads[profile.iwad]);
 	const extraOptions = sanitise(computer.extraOptions);
-	const pwads = sanitise(profile.wads);
+	const pwads = sanitise(profile.wads.join(" "));
+	//const pwads = sanitise(profile.wads);
 	const profileOptions = sanitise(profile.options);
 	const sourceportOptions = sanitise(sourceport.options);
 
@@ -366,10 +369,19 @@ function doom(profileName)
 	if(profile.autoloadProfile)
 	{
 		const autoloadProfile = data.autoloadProfiles[profile.autoloadProfile];
-		const before = sanitise(autoloadProfile.before);
-		const after = sanitise(autoloadProfile.after);
+		//const before = sanitise(autoloadProfile.before));
+		//const after = sanitise(autoloadProfile.after);
+		//files = before + " " + pwads + " " + after;
 
-		files = before + " " + pwads + " " + after;
+		if( autoloadProfile.before )
+		{
+			files = sanitise(autoloadProfile.before.join(" ")) + " " + pwads;
+		}
+
+		if( autoloadProfile.after )
+		{
+			files = pwads + " " + sanitise(autoloadProfile.after.join(" "));
+		}
 	}
 	else
 	{
@@ -401,6 +413,8 @@ function doom(profileName)
 	console.log("AFTER: " + JSON.stringify(data.profiles));
 	writeData();
 	refresh();
+
+	console.log("DOOM COMMAND: " + command);
 
 	exec(command, {cwd: dir}, () =>
 	{
@@ -577,4 +591,52 @@ function updateSearch()
 			row.style.display = "";
 		}
 	}
+}
+
+function addWad(profileName, files)
+{
+	const profile = getProfile(profileName);
+	const profileIndex = data.profiles.findIndex((item)=>item.name===profileName);
+	const table = document.getElementsByTagName("table")[0];
+	const dir = path.resolve(selectedComputer.dir);
+	const fileInput = document.getElementById("newWad");
+
+	for( let i = 0; i < files.length; i++ )
+	{
+		const file = files[i];
+		let path = file.path;
+		path = path.replace(dir+"/","");
+		data.profiles[profileIndex].wads.push(path);
+
+		// Create an empty <tr> element and add it to the 1st position of the table:
+		var row = table.insertRow(-1);
+		row.id = ("wad"+path);
+/*
+				tr(class="wadRow" id="wad"+wad)
+					td
+						button(name="deleteWad" formaction="javascript:deleteWad(\""+profile.name+"\",\""+wad+"\")") Delete
+					td
+						span
+							=wad
+*/
+		var cell1 = row.insertCell(0);
+		var cell2 = row.insertCell(1);
+
+		// Add some text to the new cells:
+		cell1.innerHTML = "<button name='deleteWad' formaction='javascript:deleteWad(\""+profileName+"\",\""+path+"\")'>Delete</button>";
+		cell2.innerHTML = "<span>" + path + "</span>";
+	}
+
+	fileInput.value = null;
+}
+
+function deleteWad(profileName, wadName)
+{
+	const profileIndex = data.profiles.findIndex((item)=>item.name===profileName);
+	data.profiles[profileIndex].wads.splice(data.profiles[profileIndex].wads.indexOf(wadName));
+	const table = document.getElementsByTagName("table")[0];
+	const rows = table.rows;
+	const item = rows.namedItem("wad"+wadName);
+	const rowIndex = item.rowIndex;
+	table.deleteRow(rowIndex);
 }
