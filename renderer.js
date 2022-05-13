@@ -371,8 +371,8 @@ function profileForm(form)
 function addProfile()
 {
 	editProfile("{\"wads\":[]}");
-	const form = document.getElementById("profileForm");
-	form["name"].removeAttribute("disabled");
+	//const form = document.getElementById("profileForm");
+	//form["name"].removeAttribute("disabled");
 }
 
 function deleteProfile(profile)
@@ -483,6 +483,7 @@ function arrayToWadList(wads)
 
 function doom(profileName)
 {
+	refreshData();
 	const profile = getProfile(profileName);
 
 	if(!profile)
