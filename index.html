@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html>
-	<head></head>
-	<body>
-		<p>
-			<font style="font-size:30px; font-weight:bold;">Doom Loader</font>
-			<br>
-			<font style="font-size:20px; font-weight:bold;">By CandiceJoy</font>
-		</p>
-		<button onclick="changeContext(contexts.profiles)">Profiles</button>
-		<button onclick="changeContext(contexts.computers)">Computers</button>
-		<button onclick="changeContext(contexts.iwads)">IWads</button>
-		<button onclick="changeContext(contexts.autoloadProfiles)">Autoload Profiles</button>
-		<button onclick="changeContext(contexts.sourceports)">Source Ports</button>
-		<p id="selectedComputer"></p>
-		<div id="app">
-			<p>Loading...</p>
-		</div>
-	</body>
-	<script src="renderer.js" type="text/javascript"></script>
+  <head>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <p><font style="font-size:30px; font-weight:bold;">Doom Loader</font><br><font style="font-size:20px; font-weight:bold;">By CandiceJoy</font></p>
+    <button onclick="changeContext(contexts.profiles)">Profiles</button>
+    <button onclick="changeContext(contexts.computers)">Computers</button>
+    <button onclick="changeContext(contexts.iwads)">IWads</button>
+    <button onclick="changeContext(contexts.autoloadProfiles)">Autoload Profiles</button>
+    <button onclick="changeContext(contexts.sourceports)">Source Ports</button>
+    <p id="selectedComputer"></p>
+    <div id="app">
+      <p>Loading...</p>
+    </div>
+  </body>
+  <script type="text/javascript" src="renderer.js"></script>
 </html>

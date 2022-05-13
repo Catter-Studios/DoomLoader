@@ -29,8 +29,10 @@ form(id="profileForm")
 						button(name="deleteWad" formaction="javascript:deleteWad(\"" + profile.name + "\",\"" + wad + "\")") Delete
 					td
 						input(type="text" class="wad" name="wads" disabled="true" size=40 value=wad)
+					td
+						button(name="wadToTop" formaction="javascript:wadToTop(\""+profile.name+"\",\""+wad+"\")") To Top
 	p Add Wad:&nbsp;&nbsp;
-		input(type="file" name="newWad" id="newWad" accept=".pk3,.pk7,.wad,.zip" onchange="addWad(\"" + profile.name + "\",this.files);" )
+		input(type="file" name="newWad" id="newWad" accept=".pk3,.pk7,.wad,.zip,.deh" onchange="addWad(\"" + profile.name + "\",this.files);" )
 	p Autoload Profile:&nbsp;&nbsp;
 		select(name="autoloadProfile")
 			each key in Object.keys(data.autoloadProfiles)

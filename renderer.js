@@ -377,9 +377,32 @@ function addProfile()
 
 function deleteProfile(profile)
 {
-	data.profiles.splice(data.profiles.indexOf(profile),1);
-	writeData();
-	refresh();
+	profile = JSON.parse(profile);
+	const index = data.profiles.findIndex((item)=>{return item.name===profile.name});
+
+	if( index >= 0 )
+	{
+		data.profiles.splice(index,1);
+		writeData();
+		refresh();
+	}
+}
+
+function wadToTop( profile, wad )
+{
+	const table = document.querySelector("table");
+
+	for( const i in table.rows )
+	{
+		const row = table.rows[i];
+		const wadName = row.querySelector(".wad").value;
+
+		if( wadName === wad )
+		{
+			table.prepend(row);
+			return;
+		}
+	}
 }
 
 function writeData()
@@ -452,6 +475,12 @@ function checkWads(wads, dir)
 	}
 }
 
+function arrayToWadList(wads)
+{
+	wads=wads.map(wad=>`"${sanitise(wad)}"`);
+	return wads.join(" ");
+}
+
 function doom(profileName)
 {
 	const profile = getProfile(profileName);
@@ -496,11 +525,12 @@ function doom(profileName)
 	let command = sourceportPath;
 
 	const iwad = sanitise(data.iwads[profile.iwad]);
-	const options = sanitise(computer.options);
+	const options = sanitise(computer.options[profile.sourceport]);
 	const wads = profile.wads;
 	checkWads(wads, dir);
-	const pwads = sanitise(wads.join(" "));
+	//const pwads = sanitise(wads.join(" "));
 	//const pwads = sanitise(profile.wads);
+	const pwads = arrayToWadList(profile.wads);
 	const profileOptions = sanitise(profile.options);
 	const sourceportOptions = sanitise(sourceport.options);
 
@@ -511,25 +541,22 @@ function doom(profileName)
 
 	command += " -iwad " + iwad;
 
-	let files;
+	let files = pwads;
 
 	if(profile.autoloadProfile)
 	{
 		const autoloadProfile = data.autoloadProfiles[profile.autoloadProfile];
-		//const before = sanitise(autoloadProfile.before));
-		//const after = sanitise(autoloadProfile.after);
-		//files = before + " " + pwads + " " + after;
 
 		if(autoloadProfile.before)
 		{
 			checkWads(autoloadProfile.before, dir);
-			files = sanitise(autoloadProfile.before.join(" ")) + " " + pwads;
+			files = arrayToWadList(autoloadProfile.before) + " " + files;
 		}
 
 		if(autoloadProfile.after)
 		{
 			checkWads(autoloadProfile.after, dir);
-			files = pwads + " " + sanitise(autoloadProfile.after.join(" "));
+			files = files + " " + arrayToWadList(autoloadProfile.after);
 		}
 	}
 	else
@@ -742,12 +769,15 @@ function addWad(profileName, files)
 		 */
 		var cell1 = row.insertCell(0);
 		var cell2 = row.insertCell(1);
+		var cell3 = row.insertCell(2);
 
 		// Add some text to the new cells:
 		cell1.innerHTML =
 			"<button name='deleteWad' formaction='javascript:deleteWad(\"" + profileName + "\",\"" + path +
 			"\")'>Delete</button>";
 		cell2.innerHTML = "<input type='text' class='wad' size=40 disabled=true name='wads[]' value='"+path+"'>";
+		//button(name="wadToTop" formaction="javascript:wadToTop(\""+profile.name+"\",\""+wad+"\")") To Top
+		cell3.innerHTML = `<button name="wadToTop" formaction="javascript:wadToTop('${profileName}','${path}')">To Top</button>`;
 	}
 
 	fileInput.value = null;
