@@ -335,7 +335,8 @@ function profileForm(form)
 	const sourceport = form["sourceport"].value;
 	const iwad = form["iwad"].value;
 	const autoloadProfile = form["autoloadProfile"].value;
-	let profile = getProfile(name);
+	const uuid = form["uuid"].value;
+	let profile = getProfile(uuid);
 
 	if(!profile)
 	{
@@ -368,9 +369,38 @@ function profileForm(form)
 	changeContext(contexts.profiles);
 }
 
+function isUniqueUUID(uuid,array)
+{
+	for( const i in array )
+	{
+		const ele = array[i];
+
+		if( ele.uuid && ele.uuid === uuid )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+function generateUUID(array)
+{
+	let uuid;
+
+	do
+	{
+		uuid = self.crypto.randomUUID();
+	}while(!isUniqueUUID(uuid,array));
+
+	return uuid;
+}
+
 function addProfile()
 {
-	editProfile("{\"wads\":[]}");
+	const uuid = generateUUID(data.profiles);
+	console.log("uuid: " + uuid);
+	editProfile("{\"wads\":[],\"uuid\":\""+uuid+"\"}");
 	//const form = document.getElementById("profileForm");
 	//form["name"].removeAttribute("disabled");
 }
@@ -378,7 +408,7 @@ function addProfile()
 function deleteProfile(profile)
 {
 	profile = JSON.parse(profile);
-	const index = data.profiles.findIndex((item)=>{return item.name===profile.name});
+	const index = data.profiles.findIndex((item)=>{return item.uuid===profile.uuid});
 
 	if( index >= 0 )
 	{
@@ -388,7 +418,7 @@ function deleteProfile(profile)
 	}
 }
 
-function wadToTop( profile, wad )
+function wadToTop( wad )
 {
 	const table = document.querySelector("table");
 
@@ -450,9 +480,9 @@ function refresh(input = contextInput)
 	window.scrollTo(0, 0);
 }
 
-function getProfile(name)
+function getProfile(uuid)
 {
-	return data.profiles.find((item)=>{return item.name===name;});
+	return data.profiles.find((item)=>{return item.uuid===uuid;});
 }
 
 function getComputer(name)
@@ -481,10 +511,10 @@ function arrayToWadList(wads)
 	return wads.join(" ");
 }
 
-function doom(profileName)
+function doom(uuid)
 {
 	refreshData();
-	const profile = getProfile(profileName);
+	const profile = getProfile(uuid);
 
 	if(!profile)
 	{
@@ -742,7 +772,7 @@ function updateSearch()
 	}
 }
 
-function addWad(profileName, files)
+function addWad(uuid, files)
 {
 	//const profile = getProfile(profileName);
 	//const profileIndex = data.profiles.findIndex((item) => item.name === profileName);
@@ -774,19 +804,19 @@ function addWad(profileName, files)
 
 		// Add some text to the new cells:
 		cell1.innerHTML =
-			"<button name='deleteWad' formaction='javascript:deleteWad(\"" + profileName + "\",\"" + path +
+			"<button name='deleteWad' formaction='javascript:deleteWad(\"" + uuid + "\",\"" + path +
 			"\")'>Delete</button>";
 		cell2.innerHTML = "<input type='text' class='wad' size=40 disabled=true name='wads[]' value='"+path+"'>";
 		//button(name="wadToTop" formaction="javascript:wadToTop(\""+profile.name+"\",\""+wad+"\")") To Top
-		cell3.innerHTML = `<button name="wadToTop" formaction="javascript:wadToTop('${profileName}','${path}')">To Top</button>`;
+		cell3.innerHTML = `<button name="wadToTop" formaction="javascript:wadToTop('${path}')">To Top</button>`;
 	}
 
 	fileInput.value = null;
 }
 
-function deleteWad(profileName, wadName)
+function deleteWad(uuid, wadName)
 {
-	const profileIndex = data.profiles.findIndex((item) => item.name === profileName);
+	const profileIndex = data.profiles.findIndex((item) => item.uuid === uuid);
 	data.profiles[profileIndex].wads.splice(data.profiles[profileIndex].wads.indexOf(wadName));
 	const table = document.getElementsByTagName("table")[0];
 	const rows = table.rows;

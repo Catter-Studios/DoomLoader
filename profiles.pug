@@ -17,7 +17,7 @@ table
 		tr(class="profileRow")
 			if selectedComputer
 				td
-					button(onclick="doom('" + sanitise(profile.name) + "')") Run
+					button(onclick="doom('" + sanitise(profile.uuid) + "')") Run
 			td
 				button(onclick="editProfile('" + sanitise(JSON.stringify(profile)) + "')") Edit
 			td
