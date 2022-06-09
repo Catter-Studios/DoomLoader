@@ -5,7 +5,8 @@ const exec = require('child_process').exec;
 const root = document.querySelector("div#app");
 const contexts = {};
 const oslib = require("os");
-let dataFile = "../data/data.json";
+const dataPath = "/Dropbox/SaveGames/doom/data";
+let dataFile;
 const selectedComputerTitle = "Selected Computer: ";
 let data;
 let selectedComputer;
@@ -47,27 +48,32 @@ function isUnix()
 	return isMac() || isLinux();
 }
 
-if(__dirname.match(/webstormprojects/igm))
+const locations = ["data.json", "../data.json", "../../data.json", process.env.HOME + dataPath + "/data.json", process.env.UserProfile + dataPath + "\\data.json" ];
+
+for( const i in locations )
 {
-	const path = "/Dropbox/SaveGames/doom/data/data.json";
+	const location = locations[i];
 
-	if( isUnix() )
+	if( fs.existsSync( location ) )
 	{
-		dataFile = process.env.HOME + path;
-	}
-
-	if( isWindows() )
-	{
-		dataFile = process.env.UserProfile + path;
+		dataFile = location;
+		break;
 	}
 }
 
-if(!fs.existsSync(dataFile))
+if( !dataFile )
 {
-	alert("Cannot find data file in " + (__dirname + "/" + dataFile));
+	alert("No data file found.\nCreating one for you.");
+	fs.writeFileSync("data.json", JSON.stringify({
+		profiles: [],
+		autoloadProfiles: [],
+		computers: [],
+		sourceports: [],
+		iwads: []
+	                                             }, null, "\t"));
 }
 
-//console.log("FILE: " + dataFile);
+console.log("Data File: " + dataFile);
 
 contexts.profiles = {
 	template: "profiles.pug",
@@ -171,13 +177,15 @@ function compileAll()
 			continue;
 		}
 
+		val.template = "resources/app/" + val.template;
+
 		if(!fs.existsSync(val.template))
 		{
-			//console.log("Cannot find " + val.template);
+			console.log("Cannot find " + val.template);
 			continue;
 		}
 
-		//console.log("Compiling " + val.template);
+		console.log("Compiling " + val.template);
 		const pugFunc = pug.compileFile(val.template);
 
 		if(!pugFunc)
