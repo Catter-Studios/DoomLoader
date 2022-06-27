@@ -1,0 +1,35 @@
+form(id="autoloadProfileForm")
+	input(type="hidden", name="uuid", value=autoloadProfile.uuid)
+	p Name:&nbsp;&nbsp;
+		input(type="text", name="name", size=50, value=(autoloadProfile.name || ""))
+	p Before Profile WADs:&nbsp;&nbsp;
+		table(id="beforeTable")
+			each wad in autoloadProfile.before
+				tr(class="wadRow" id="wad" + wad)
+					td
+						button(name="deleteWad" formaction="javascript:deleteWad(\"" + wad + "\",\"#beforeTable\")") Delete
+					td
+						input(type="text" class="wad" name="wads" disabled="true" size=40 value=wad)
+					td
+						button(name="wadUp" class="wadUp" formaction="javascript:moveWad('" + wad + "','up','#beforeTable')") ↑
+					td
+						button(name="wadDown" class="wadDown" formaction="javascript:moveWad('" + wad + "','down','#beforeTable')") ↓
+		p Add Before:&nbsp;&nbsp;
+			input(type="file" name="newBeforeWad" id="newBeforeWad" accept=".pk3,.pk7,.wad,.zip,.deh" onchange="addWad(this.files,\"#newBeforeWad\",\"#beforeTable\");" multiple)
+	p After Profile WADs:&nbsp;&nbsp;
+		table(id="afterTable")
+			each wad in autoloadProfile.after
+				tr(class="wadRow" id="wad" + wad)
+					td
+						button(name="deleteWad" formaction="javascript:deleteWad(\"" + wad + "\",\"#afterTable\")") Delete
+					td
+						input(type="text" class="wad" name="wads" disabled="true" size=40 value=wad)
+					td
+						button(name="wadUp" class="wadUp" formaction="javascript:moveWad('" + wad + "','up','#afterTable')") ↑
+					td
+						button(name="wadDown" class="wadDown" formaction="javascript:moveWad('" +wad +"','down','#afterTable')") ↓
+		p Add After:&nbsp;&nbsp;
+			input(type="file" name="newAfterWad" id="newAfterWad" accept=".pk3,.pk7,.wad,.zip,.deh" onchange="addWad(this.files,\"#newAfterWad\",\"#afterTable\");" multiple)
+
+	button(name="save" type="submit" formaction="javascript:autoloadProfileForm(document.getElementById('autoloadProfileForm'));") Save
+	button(name="cancel" formaction="javascript:changeContext(contexts.profiles);") Cancel

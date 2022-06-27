@@ -1,0 +1,9 @@
+table
+	each autoloadProfile in autoloadProfiles
+		tr(class="autoloadProfileRow")
+			td
+				button(onclick="editAutoloadProfile('" + sanitise( autoloadProfile.uuid ) + "')") Edit
+			td
+				button(onclick="deleteAutoloadProfile('" + sanitise( autoloadProfile.uuid ) + "')") Delete
+			td(class="profileName")= autoloadProfile.name
+button(onclick="addAutoloadProfile()") Add Profile

@@ -81,7 +81,8 @@ contexts.profiles = {
 };
 
 contexts.profile = {
-	template: "profile.pug"
+	template: "profile.pug",
+	func: wadListInit
 };
 
 contexts.addProfile = {
@@ -110,7 +111,8 @@ contexts.autoloadProfiles = {
 };
 
 contexts.autoloadProfile = {
-	template: "autoloadProfile.pug"
+	template: "autoloadProfile.pug",
+	func: wadListInit
 };
 
 contexts.sourceports = {
@@ -177,7 +179,10 @@ function compileAll()
 			continue;
 		}
 
-		val.template = "resources/app/" + val.template;
+		if(!fs.existsSync(val.template))
+		{
+			val.template = "resources/app/" + val.template;
+		}
 
 		if(!fs.existsSync(val.template))
 		{
@@ -285,17 +290,82 @@ function deleteComputer(computer)
 
 function autoloadProfileForm(form)
 {
+	const name = form["name"].value;
+	const uuid = form["uuid"].value;
+	let profile = getAutoloadProfile(uuid);
 
+	if(!profile)
+	{
+		profile = {
+			name: name,
+			before: [],
+			after: [],
+			uuid: uuid
+		};
+		data.autoloadProfiles.push(profile);
+	}
+
+	profile.name = name;
+
+	const beforeElements = document.querySelectorAll("form#autoloadProfileForm #beforeTable input.wad");
+	const beforeWads = [];
+
+	for( let i = 0; i < beforeElements.length; i++ )
+	{
+		const wadElement = beforeElements[i];
+		beforeWads.push(wadElement.value);
+	}
+
+	profile.before = beforeWads;
+
+	const afterElements = document.querySelectorAll("form#autoloadProfileForm #afterTable input.wad");
+	const afterWads = [];
+
+	for( let i = 0; i < afterElements.length; i++ )
+	{
+		const wadElement = afterElements[i];
+		afterWads.push(wadElement.value);
+	}
+
+	profile.after = afterWads;
+
+	writeData();
+	changeContext(contexts.profiles);
 }
 
 function addAutoloadProfile()
 {
-
+	const uuid = generateUUID(data.autoloadProfiles);
+	console.log("uuid: " + uuid);
+	const obj = {
+		uuid: uuid,
+		before: [],
+		after: [],
+		name: ""
+	};
+	data.autoloadProfiles.push(obj);
+	writeData();
+	editAutoloadProfile(uuid);
 }
 
-function deleteAutoloadProfile(autoloadProfile)
+function editAutoloadProfile(uuid)
 {
+	changeContext(contexts.autoloadProfile, {
+		data   : data,
+		autoloadProfile: getAutoloadProfile(uuid)
+	});
+}
 
+function deleteAutoloadProfile(uuid)
+{
+	const index = data.autoloadProfiles.findIndex((item)=>{return item.uuid===uuid});
+
+	if( index >= 0 )
+	{
+		data.autoloadProfiles.splice(index,1);
+		writeData();
+		refresh();
+	}
 }
 
 function sourceportForm(form)
@@ -426,14 +496,23 @@ function deleteProfile(profile)
 	}
 }
 
-function wadToTop( wad )
+function print(label,obj)
 {
-	const table = document.querySelector("table");
+	console.log(label+": ",obj);
+}
 
-	for( const i in table.rows )
+/*function wadToTop( wad, tableSelector="table" )
+{
+	print("wad", wad);
+	const table = document.querySelector(tableSelector);
+	print("table",table);
+	print("rows",table.rows );
+
+	for( const row of table.rows )
 	{
-		const row = table.rows[i];
+		print("row",row);
 		const wadName = row.querySelector(".wad").value;
+		print("wadName", wadName);
 
 		if( wadName === wad )
 		{
@@ -441,7 +520,7 @@ function wadToTop( wad )
 			return;
 		}
 	}
-}
+}*/
 
 function writeData()
 {
@@ -491,6 +570,11 @@ function refresh(input = contextInput)
 function getProfile(uuid)
 {
 	return data.profiles.find((item)=>{return item.uuid===uuid;});
+}
+
+function getAutoloadProfile(uuid)
+{
+	return data.autoloadProfiles.find((item)=>{return item.uuid===uuid;});
 }
 
 function getComputer(name)
@@ -584,7 +668,7 @@ function doom(uuid)
 
 	if(profile.autoloadProfile)
 	{
-		const autoloadProfile = data.autoloadProfiles[profile.autoloadProfile];
+		const autoloadProfile = getAutoloadProfile( profile.autoloadProfile );
 
 		if(autoloadProfile.before)
 		{
@@ -682,8 +766,9 @@ function sanitisePath(str)
 
 	if(path)
 	{
-		str = str.replaceAll("/", path.sep);
-		str = str.replaceAll("\\", path.sep);
+		str = str.replaceAll(/\//ig, path.sep);
+		//str = str.replaceAll( /(?<!\\)\\(?!\\)/g, "\\\\" );
+		str = str.replaceAll(/\\/ig, path.sep);
 	}
 
 	return str;
@@ -780,24 +865,34 @@ function updateSearch()
 	}
 }
 
-function addWad(uuid, files)
+function addWad(files,fileSelector="#newWad",tableSelector="table")
 {
 	//const profile = getProfile(profileName);
 	//const profileIndex = data.profiles.findIndex((item) => item.name === profileName);
-	const table = document.getElementsByTagName("table")[0];
+	const table = document.querySelector(tableSelector);
+
+	if( !selectedComputer )
+	{
+		alert( "You have not selected a computer yet." );
+		return;
+	}
+
 	const dir = path.resolve(selectedComputer.dir);
-	const fileInput = document.getElementById("newWad");
+	const fileInput = document.querySelector(fileSelector);
 
 	for(let i = 0; i < files.length; i++)
 	{
 		const file = files[i];
-		let path = file.path;
-		path = path.replace(dir + "/", "");
+		let wadPath = file.path;
+		wadPath = path.relative(dir,wadPath);
+		const cleanWadPath = wadPath.replace(/(?<!\\)\\(?!\\)/ig, "\\\\");
+
 		//data.profiles[profileIndex].wads.push(path);
 
 		// Create an empty <tr> element and add it to the 1st position of the table:
-		var row = table.insertRow(-1);
-		row.id = ("wad" + path);
+		const row = table.insertRow(-1);
+		row.id = ("wad" + wadPath);
+		row.classList.add("wadRow");
 		/*
 		 tr(class="wadRow" id="wad"+wad)
 		 td
@@ -806,29 +901,153 @@ function addWad(uuid, files)
 		 span
 		 =wad
 		 */
-		var cell1 = row.insertCell(0);
-		var cell2 = row.insertCell(1);
-		var cell3 = row.insertCell(2);
+		const cell1 = row.insertCell(0);
+		const cell2 = row.insertCell(1);
+		const cell3 = row.insertCell(2);
+		const cell4 = row.insertCell(3);
 
 		// Add some text to the new cells:
-		cell1.innerHTML =
-			"<button name='deleteWad' formaction='javascript:deleteWad(\"" + uuid + "\",\"" + path +
-			"\")'>Delete</button>";
-		cell2.innerHTML = "<input type='text' class='wad' size=40 disabled=true name='wads[]' value='"+path+"'>";
+		cell1.innerHTML = `<button name="deleteWad" formaction="javascript:deleteWad('${cleanWadPath}','${tableSelector}')">Delete</button>`;
+		cell2.innerHTML = `<input type='text' class='wad' size=40 disabled=true name='wads' value='${wadPath}'>`;
 		//button(name="wadToTop" formaction="javascript:wadToTop(\""+profile.name+"\",\""+wad+"\")") To Top
-		cell3.innerHTML = `<button name="wadToTop" formaction="javascript:wadToTop('${path}')">To Top</button>`;
+		//console.log(`<button name="wadUp" formaction="javascript:moveWad('${wadPath}','up','${tableSelector}')">↑</button>`);
+		cell3.innerHTML = `<button name="wadUp" class="wadUp" formaction="javascript:moveWad('${cleanWadPath}','up','${tableSelector}')">\u2191</button>`;
+		//console.log(`<button name="wadDown" formaction="javascript:moveWad('${wadPath}','down','${tableSelector}')">↓</button>`);
+		cell4.innerHTML = `<button name="wadDown" class="wadDown" formaction="javascript:moveWad('${cleanWadPath}','down','${tableSelector}')">\u2193</button>`;
 	}
 
 	fileInput.value = null;
+	refreshWadButtons(tableSelector);
 }
 
-function deleteWad(uuid, wadName)
+function deleteWad(wadName,tableSelector="table")
 {
-	const profileIndex = data.profiles.findIndex((item) => item.uuid === uuid);
-	data.profiles[profileIndex].wads.splice(data.profiles[profileIndex].wads.indexOf(wadName));
-	const table = document.getElementsByTagName("table")[0];
+	//const profileIndex = data.profiles.findIndex((item) => item.uuid === uuid);
+	//data.profiles[profileIndex].wads.splice(data.profiles[profileIndex].wads.indexOf(wadName));
+	const table = document.querySelector(tableSelector);
 	const rows = table.rows;
 	const item = rows.namedItem("wad" + wadName);
 	const rowIndex = item.rowIndex;
 	table.deleteRow(rowIndex);
+}
+
+function refreshWadButtons(tableSelector="table")
+{
+	const table = document.querySelector(tableSelector).children[0];
+
+	//No rows
+	if( !table || !table.children )
+	{
+		return;
+	}
+
+	//Reset all displays just in case
+	for( const child of table.children )
+	{
+		const up = child.querySelector(".wadUp");
+		const down = child.querySelector(".wadDown");
+		up.style.display = "";
+		down.style.display = "";
+	}
+
+	//Hide up/down because we only have 1 row
+	if( table.children.length <= 1 )
+	{
+		for( const child of table.children )
+		{
+			const up = child.querySelector(".wadUp");
+			const down = child.querySelector(".wadDown");
+			up.style.display = "none";
+			down.style.display = "none";
+		}
+
+		return;
+	}
+
+	//Hide up button on first row and down button on last row
+	const first = table.children[0];
+	const last = table.children[table.children.length-1];
+	const firstUp = first.querySelector(".wadUp");
+	const lastDown = last.querySelector( ".wadDown" );
+	firstUp.style.display = "none";
+	lastDown.style.display= "none";
+}
+
+function moveWad(wadName,location,tableSelector="table")
+{
+	const table = document.querySelector(tableSelector).children[0];
+
+	//No rows
+	if( !table || !table.children )
+	{
+		return;
+	}
+
+	let index;
+
+	//Find the index of the row
+	for( let i = 0; i < table.children.length; i++ )
+	{
+		const row = table.children[i];
+		const ele = row.querySelector(".wad");
+
+		if( ele.value === wadName )
+		{
+			index = i;
+			break;
+		}
+	}
+
+	//Do nothing if you can't find the index
+	if( index !== 0 && !index )
+	{
+		return;
+	}
+
+	const row = table.children[index];
+
+	//Perform operation
+	switch( location.toLowerCase() )
+	{
+		case "up":
+			if( index > 0 )
+			{
+				const before = table.children[index-1];
+				table.insertBefore(row,before);
+			}
+			break;
+		case "down":
+			if( index < table.children.length - 1 )
+			{
+				const after = table.children[index+2];
+				table.insertBefore(row,after);
+			}
+			break;
+		case "top":
+			const first = table.children[0];
+			table.insertBefore( row, first );
+			break;
+		case "bottom":
+			table.insertBefore( row, null );
+			break;
+	}
+
+	refreshWadButtons(tableSelector);
+}
+
+function wadListInit()
+{
+	const tables = document.querySelectorAll("table");
+
+	for( const table of tables )
+	{
+		if( !table.id )
+		{
+			refreshWadButtons();
+		}
+		else
+		{
+			refreshWadButtons("#"+table.id);
+		}
+	}
 }
