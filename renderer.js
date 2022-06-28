@@ -929,6 +929,7 @@ function deleteWad(wadName,tableSelector="table")
 	const item = rows.namedItem("wad" + wadName);
 	const rowIndex = item.rowIndex;
 	table.deleteRow(rowIndex);
+	refreshWadButtons(tableSelector);
 }
 
 function refreshWadButtons(tableSelector="table")
