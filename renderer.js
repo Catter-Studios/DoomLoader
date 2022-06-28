@@ -973,7 +973,7 @@ function refreshWadButtons(tableSelector="table")
 	lastDown.style.display= "none";
 }
 
-function moveWad(wadName,location,tableSelector="table")
+function moveWad(wadName,location,tableSelector="table",destinationTable=null)
 {
 	const table = document.querySelector(tableSelector).children[0];
 
@@ -1009,6 +1009,22 @@ function moveWad(wadName,location,tableSelector="table")
 	//Perform operation
 	switch( location.toLowerCase() )
 	{
+		case "table":
+			const newTable = document.querySelector(destinationTable).children[0];
+			newTable.insertBefore(row,null);
+			const moveButton = row.querySelector(".moveWad");
+			const upButton = row.querySelector(".wadUp");
+			const downButton = row.querySelector(".wadDown");
+
+			const moveAction = moveButton.getAttribute("formaction");
+			const upAction = upButton.getAttribute("formaction");
+			const downAction = downButton.getAttribute("formaction");
+
+			moveButton.setAttribute( "formaction", moveAction.replace( /(?<=\(.*?,.*?,\s*['"])(.*?)(['"]?\s*,['"]?\s*)(.*?)(?=\s*['"]\))/g, "$3$2$1" ) );
+			upButton.setAttribute( "formaction", upAction.replace(/(?<=\(.*?,.*?,\s*['"])(.*?)(?=\s*['"]\))/g,destinationTable));
+			downButton.setAttribute( "formaction", downAction.replace(/(?<=\(.*?,.*?,\s*['"])(.*?)(?=\s*['"]\))/g,destinationTable));
+
+			break;
 		case "up":
 			if( index > 0 )
 			{
@@ -1033,6 +1049,11 @@ function moveWad(wadName,location,tableSelector="table")
 	}
 
 	refreshWadButtons(tableSelector);
+
+	if( destinationTable )
+	{
+		refreshWadButtons(destinationTable);
+	}
 }
 
 function wadListInit()

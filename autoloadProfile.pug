@@ -11,9 +11,11 @@ form(id="autoloadProfileForm")
 					td
 						input(type="text" class="wad" name="wads" disabled="true" size=40 value=wad)
 					td
-						button(name="wadUp" class="wadUp" formaction="javascript:moveWad('" + wad + "','up','#beforeTable')") ↑
+						button(class="wadUp" formaction="javascript:moveWad('" + wad + "','up','#beforeTable')") ↑
 					td
-						button(name="wadDown" class="wadDown" formaction="javascript:moveWad('" + wad + "','down','#beforeTable')") ↓
+						button(class="wadDown" formaction="javascript:moveWad('" + wad + "','down','#beforeTable')") ↓
+					td
+						button(class="moveWad" formaction="javascript:moveWad('" + wad + "','table','#beforeTable','#afterTable')") Move
 		p Add Before:&nbsp;&nbsp;
 			input(type="file" name="newBeforeWad" id="newBeforeWad" accept=".pk3,.pk7,.wad,.zip,.deh" onchange="addWad(this.files,\"#newBeforeWad\",\"#beforeTable\");" multiple)
 	p After Profile WADs:&nbsp;&nbsp;
@@ -25,9 +27,11 @@ form(id="autoloadProfileForm")
 					td
 						input(type="text" class="wad" name="wads" disabled="true" size=40 value=wad)
 					td
-						button(name="wadUp" class="wadUp" formaction="javascript:moveWad('" + wad + "','up','#afterTable')") ↑
+						button(class="wadUp" formaction="javascript:moveWad('" + wad + "','up','#afterTable')") ↑
 					td
-						button(name="wadDown" class="wadDown" formaction="javascript:moveWad('" +wad +"','down','#afterTable')") ↓
+						button(class="wadDown" formaction="javascript:moveWad('" +wad +"','down','#afterTable')") ↓
+					td
+						button(class="moveWad" formaction="javascript:moveWad('" +wad + "','table','#afterTable', '#beforeTable')") Move
 		p Add After:&nbsp;&nbsp;
 			input(type="file" name="newAfterWad" id="newAfterWad" accept=".pk3,.pk7,.wad,.zip,.deh" onchange="addWad(this.files,\"#newAfterWad\",\"#afterTable\");" multiple)
 

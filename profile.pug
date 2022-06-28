@@ -31,9 +31,9 @@ form(id="profileForm")
 					td
 						input(type="text" class="wad" name="wads" disabled="true" size=40 value=wad)
 					td
-						button(name="wadUp" class="wadUp" formaction="javascript:moveWad('" + wad + "','up')") ↑
+						button(class="wadUp" formaction="javascript:moveWad('" + wad + "','up')") ↑
 					td
-						button(name="wadDown" class="wadDown" formaction="javascript:moveWad('" + wad + "','down')") ↓
+						button(class="wadDown" formaction="javascript:moveWad('" + wad + "','down')") ↓
 	p Add Wad:&nbsp;&nbsp;
 		input(type="file" name="newWad" id="newWad" accept=".pk3,.pk7,.wad,.zip,.deh" onchange="addWad(\"" + profile.uuid + "\",this.files);" multiple)
 	p Autoload Profile:&nbsp;&nbsp;
