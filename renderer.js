@@ -766,11 +766,10 @@ function sanitisePath(str)
 
 	if(path)
 	{
-		str = str.replaceAll(/\//ig, path.sep);
+		str = str.replaceAll(/\\\\/ig, "//");
+		str = str.replaceAll(/\\/ig, "/");
 		//str = str.replaceAll( /(?<!\\)\\(?!\\)/g, "\\\\" );
-		str = str.replaceAll(/\\/ig, path.sep);
 	}
-
 	return str;
 }
 
@@ -885,7 +884,7 @@ function addWad(files,fileSelector="#newWad",tableSelector="table")
 		const file = files[i];
 		let wadPath = file.path;
 		wadPath = path.relative(dir,wadPath);
-		const cleanWadPath = wadPath.replace(/(?<!\\)\\(?!\\)/ig, "\\\\");
+		wadPath = sanitisePath(wadPath);
 
 		//data.profiles[profileIndex].wads.push(path);
 
@@ -907,13 +906,13 @@ function addWad(files,fileSelector="#newWad",tableSelector="table")
 		const cell4 = row.insertCell(3);
 
 		// Add some text to the new cells:
-		cell1.innerHTML = `<button name="deleteWad" formaction="javascript:deleteWad('${cleanWadPath}','${tableSelector}')">Delete</button>`;
+		cell1.innerHTML = `<button formaction="javascript:deleteWad('${wadPath}','${tableSelector}')">Delete</button>`;
 		cell2.innerHTML = `<input type='text' class='wad' size=40 disabled=true name='wads' value='${wadPath}'>`;
 		//button(name="wadToTop" formaction="javascript:wadToTop(\""+profile.name+"\",\""+wad+"\")") To Top
 		//console.log(`<button name="wadUp" formaction="javascript:moveWad('${wadPath}','up','${tableSelector}')">↑</button>`);
-		cell3.innerHTML = `<button name="wadUp" class="wadUp" formaction="javascript:moveWad('${cleanWadPath}','up','${tableSelector}')">\u2191</button>`;
+		cell3.innerHTML = `<button class="wadUp" formaction="javascript:moveWad('${wadPath}','up','${tableSelector}')">\u2191</button>`;
 		//console.log(`<button name="wadDown" formaction="javascript:moveWad('${wadPath}','down','${tableSelector}')">↓</button>`);
-		cell4.innerHTML = `<button name="wadDown" class="wadDown" formaction="javascript:moveWad('${cleanWadPath}','down','${tableSelector}')">\u2193</button>`;
+		cell4.innerHTML = `<button class="wadDown" formaction="javascript:moveWad('${wadPath}','down','${tableSelector}')">\u2193</button>`;
 	}
 
 	fileInput.value = null;
