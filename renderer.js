@@ -264,6 +264,7 @@ function computerForm(form)
 	computer.os = os;
 	computer.options = options;
 
+	moveToBeginning(data.computers,computer);
 	writeData();
 	changeContext(contexts.computers);
 }
@@ -288,24 +289,41 @@ function deleteComputer(computer)
 	refresh();
 }
 
+function moveToBeginning(arr,ele)
+{
+	const index = arr.indexOf(ele);
+
+	if( index < 0 )
+	{
+		return;
+	}
+	console.log( "Index: " + index );
+	console.log("Pre arr: ",arr);
+
+	arr.splice(index, 1);
+	arr.unshift(ele);
+	console.log("Post arr: ",arr);
+	writeData();
+}
 function autoloadProfileForm(form)
 {
 	const name = form["name"].value;
 	const uuid = form["uuid"].value;
-	let profile = getAutoloadProfile(uuid);
+	let autoloadProfile = getAutoloadProfile(uuid);
 
-	if(!profile)
+	if(!autoloadProfile)
 	{
-		profile = {
+		autoloadProfile = {
 			name: name,
 			before: [],
 			after: [],
 			uuid: uuid
 		};
-		data.autoloadProfiles.push(profile);
+		console.log("PUSH1");
+		data.autoloadProfiles.push(autoloadProfile);
 	}
 
-	profile.name = name;
+	autoloadProfile.name = name;
 
 	const beforeElements = document.querySelectorAll("form#autoloadProfileForm #beforeTable input.wad");
 	const beforeWads = [];
@@ -316,7 +334,7 @@ function autoloadProfileForm(form)
 		beforeWads.push(wadElement.value);
 	}
 
-	profile.before = beforeWads;
+	autoloadProfile.before = beforeWads;
 
 	const afterElements = document.querySelectorAll("form#autoloadProfileForm #afterTable input.wad");
 	const afterWads = [];
@@ -327,13 +345,13 @@ function autoloadProfileForm(form)
 		afterWads.push(wadElement.value);
 	}
 
-	profile.after = afterWads;
+	autoloadProfile.after = afterWads;
+	moveToBeginning(data.autoloadProfiles,autoloadProfile);
 
-	writeData();
-	changeContext(contexts.profiles);
+	changeContext(contexts.autoloadProfiles);
 }
 
-function addAutoloadProfile()
+function addAutoloadProfile(doEdit=true)
 {
 	const uuid = generateUUID(data.autoloadProfiles);
 	console.log("uuid: " + uuid);
@@ -345,9 +363,42 @@ function addAutoloadProfile()
 	};
 	data.autoloadProfiles.push(obj);
 	writeData();
-	editAutoloadProfile(uuid);
+
+	if( doEdit )
+	{
+		editAutoloadProfile(uuid);
+	}
+
+	return uuid;
 }
 
+function duplicateAutoloadProfile(oldUuid)
+{
+	console.log(data);
+	const newUuid = addAutoloadProfile(false);
+	const oldAutoloadProfile = getAutoloadProfile(oldUuid);
+	const newAutoloadProfile = getAutoloadProfile(newUuid);
+	const index = getIndexOf(data.autoloadProfiles,newUuid);
+
+	for( const key of Object.keys( oldAutoloadProfile ) )
+	{
+		if( key.toLowerCase() === "uuid" )
+		{
+			continue;
+		}
+
+		if( key.toLowerCase() === "name" )
+		{
+			newAutoloadProfile.name = oldAutoloadProfile.name + " (Duplicate)";
+		}
+
+		newAutoloadProfile[key] = oldAutoloadProfile[key];
+	}
+
+	data.autoloadProfiles[index] = newAutoloadProfile;
+	writeData();
+	refresh();
+}
 function editAutoloadProfile(uuid)
 {
 	changeContext(contexts.autoloadProfile, {
@@ -426,6 +477,7 @@ function profileForm(form)
 	profile.sourceport = sourceport;
 	profile.iwad = iwad;
 	profile.autoloadProfile = autoloadProfile;
+	profile.uuid = uuid;
 
 	if(form["options"])
 	{
@@ -442,6 +494,7 @@ function profileForm(form)
 	}
 
 	profile.wads = wads;
+	moveToBeginning(data.profiles,profile);
 
 	writeData();
 	changeContext(contexts.profiles);
@@ -577,6 +630,21 @@ function getAutoloadProfile(uuid)
 	return data.autoloadProfiles.find((item)=>{return item.uuid===uuid;});
 }
 
+function getIndexOf(arr,uuid)
+{
+	for( let x = 0; x < arr.length; x++ )
+	{
+		const item = arr[x];
+
+		if( item.uuid === uuid )
+		{
+			return x;
+		}
+	}
+
+	return null;
+}
+
 function getComputer(name)
 {
 	return data.computers.find((item)=>{return item.name===name;});
@@ -702,12 +770,7 @@ function doom(uuid)
 	//console.log(command);
 	//console.log("BEFORE: " + JSON.stringify(data.profiles));
 
-	data.profiles = data.profiles.filter(function(ele)
-	                                     {
-		                                     return ele != profile;
-	                                     });
-
-	data.profiles.unshift(profile);
+	moveToBeginning(data.profiles,profile);
 
 	//console.log("AFTER: " + JSON.stringify(data.profiles));
 	writeData();

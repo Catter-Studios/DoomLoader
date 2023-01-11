@@ -4,6 +4,8 @@ table
 			td
 				button(onclick="editAutoloadProfile('" + sanitise( autoloadProfile.uuid ) + "')") Edit
 			td
+				button(onclick="duplicateAutoloadProfile('" + sanitise(autoloadProfile.uuid) + "')") Duplicate
+			td
 				button(onclick="deleteAutoloadProfile('" + sanitise( autoloadProfile.uuid ) + "')") Delete
 			td(class="profileName")= autoloadProfile.name
 button(onclick="addAutoloadProfile()") Add Profile
