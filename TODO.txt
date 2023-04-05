@@ -1,0 +1,5 @@
+* Pretty up everything
+* Create initial blank data.json
+* (Wishlist) Auto-find wads, allow user to sort them
+* sourceport creation and editing
+* iwad creation and editing
